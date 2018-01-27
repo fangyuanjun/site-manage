@@ -1,0 +1,92 @@
+﻿@model Blogs.UI.Manage.Models.Topic
+
+@{
+    ViewBag.Title = "修改";
+    Layout = "~/Views/V1/Shared/_Index_LayoutEdit.cshtml";
+}
+
+<script type="text/javascript">
+    $(function () {
+        $("#btnSave").click(function () {
+            if ($("#EditForm").valid()) {
+                $.ajax({
+                    url: "/Topic/Edit/" + $("#topicID").val(),
+                    type: "Post",
+                    data: $("#EditForm").serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.code == 1) {
+                            window.parent.frameReturnByMes(data.message);
+                            window.parent.frameReturnByReload(true);
+                            window.parent.frameReturnByClose();
+                        }
+                        else {
+                            window.parent.frameReturnByMes(data.message);
+                        }
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        //hideOverlay();
+                        alert("错误");
+                        document.write(XMLHttpRequest.responseText);
+                    }
+                });
+            }
+        });
+    })
+</script>
+
+<div class="mvctool bgb">
+    <a id="btnSave" style="float: left;" class="l-btn l-btn-plain"><span class="l-btn-left"><span class="l-btn-text icon-save" style="padding-left: 20px;">保存</span></span></a>
+</div>
+
+@using (Html.BeginForm("Edit", "Member", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <table class="fromEditTable setTextWidth300">
+        <tbody>
+            <tr style="display:none">
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.topicID)：
+                </td>
+                <td>
+                    @Html.EditorFor(model => model.topicID)
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.topicID)</td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.topicDisplay)：
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.topicDisplay)
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.topicDisplay)</td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.ADD_DATE)：
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.ADD_DATE, new { @readonly = "readonly" })
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.ADD_DATE)</td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.UPDATE_DATE)：
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.UPDATE_DATE, new { @readonly = "readonly" })
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.UPDATE_DATE)</td>
+            </tr>
+        </tbody>
+    </table>
+
+}
+

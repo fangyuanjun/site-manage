@@ -1,0 +1,241 @@
+﻿@model Blogs.Entity.blog_tb_slider
+
+@{
+    ViewBag.Title = "修改";
+    Layout = "~/Views/V1/Shared/_Index_LayoutEdit.cshtml";
+}
+<link href="http://static.kecq.com/style/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<link href="http://static.kecq.com/js/webuploader0.1.5/webuploader.css" rel="stylesheet" />
+<script src="http://static.kecq.com/js/webuploader0.1.5/webuploader.min.js"></script>
+<script type="text/javascript">
+    $(function () {
+        $("#btnSave").click(function () {
+            if ($("#EditForm").valid()) {
+                $.ajax({
+                    url: "/Slider/Edit/" + $("#ID").val(),
+                    type: "Post",
+                    data: $("#EditForm").serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.code == 1) {
+                            window.parent.frameReturnByMes(data.message);
+                            window.parent.frameReturnByReload(true);
+                            window.parent.frameReturnByClose();
+                        }
+                        else {
+                            window.parent.frameReturnByMes(data.message);
+                        }
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        //hideOverlay();
+                        alert("错误");
+                        document.write(XMLHttpRequest.responseText);
+                    }
+                });
+            }
+        });
+    })
+</script>
+
+<div class="mvctool bgb">
+    <a id="btnSave" style="float: left;" class="l-btn l-btn-plain"><span class="l-btn-left"><span class="l-btn-text icon-save" style="padding-left: 20px;">保存</span></span></a>
+</div>
+
+@using (Html.BeginForm("Edit", "Slider", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <table class="fromEditTable setTextWidth300">
+        <tbody>
+            <tr style="display:none">
+                <td style="width:100px; text-align:right;"></td>
+                <td>
+                    @Html.EditorFor(model => model.ID)
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.ID)</td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    URL:
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.Url, new { @style = "height:24px" })
+                </td>
+                <td></td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    图片:
+                </td>
+                <td>
+                    <p  style="color:#808080">1920 X 550   该项会上传原图</p>
+                    <input type="hidden" name="ObjectID" value="@ViewBag.ObjectID" />
+                    <div id="uploader" class="wu-example" style="width:100px;">
+                        <div id="successdiv" style="width: 100px; height: 75px; z-index: 200; display:none; position: absolute; background: url(http://static.kecq.com/js/webuploader/images/success.png) no-repeat right bottom; "></div>
+                        <!--用来存放文件信息-->
+                        <div id="fillist" class="uploader-list">
+                            <img id="showImage" src="@Model.Pic" width="100" height="75" />
+                        </div>
+                        <div class="progress progress-striped active hidden" id="progressdiv">
+                            <div class="progress-bar" role="progressbar" style="width: 10%">
+                            </div>
+                        </div>
+                        <div id="picker">上传</div>
+                        <input type="hidden" id="id_lastImageID_mainPic" value="" />
+                        <input type="hidden" id="id_lastImageName_mainPic" value="http://static.kecq.com/images/common/nopic.jpg" name="lastImageName_mainPic" />
+                    </div>
+
+
+
+                    <script type="text/javascript">
+
+                        // 优化retina, 在retina下这个值是2
+                        ratio = window.devicePixelRatio || 1,
+
+                        // 缩略图大小
+                        thumbnailWidth = 100 * ratio,
+                        thumbnailHeight = 75 * ratio;
+
+                        var uploader = WebUploader.create({
+                            // 自动上传。
+                            auto: true,
+                            //限制单选
+                            multiple: false,
+                            swf: 'http://static.kecq.com/js/webuploader/Uploader.swf',
+                            server: '@Utility.UploadUrl?objectID=@ViewBag.ObjectID&objectTag=mainPic&objectType=blog&pathFormat={}&subDir=slider&appName=@Blogs.UI.Manage.UserInfo.AppName&ThumbMod=None&isLimitImage=1&ThumWidth=1920&ThumHeight=550&ThumPassSizeKB=1&isSaveOriginalImage=true',
+                            pick: '#picker',
+                            // 不压缩image, 默认如果是jpeg，文件上传前会压缩一把再上传！
+                            resize: false,
+                            // 只允许选择文件，可选。
+                            accept: {
+                                title: 'Images',
+                                extensions: 'gif,jpg,jpeg,bmp,png',
+                                mimeTypes: 'image/*'
+                            },
+                            compress:{
+                                compressSize: 10485760    //小于10MB 不压缩
+                            }
+                        });
+
+                        // 当有文件被添加进队列的时候
+                        uploader.on('fileQueued', function (file) {
+
+                            // 创建缩略图
+                            uploader.makeThumb(file, function (error, src) {
+                                if (error) {
+                                    //$("#showImage").replaceWith('<span>不能预览</span>');
+                                    alert("不能预览图片");
+                                    return;
+                                }
+
+                                $("#showImage").attr('src', src);
+                            }, thumbnailWidth, thumbnailHeight);
+                        });
+
+
+
+                        uploader.on('uploadStart', function (file) {
+
+                            var params = 'objectID=@ViewBag.ObjectID&objectTag=mainPic&objectType=blog&pathFormat={}&subDir=slider&appName=@Blogs.UI.Manage.UserInfo.AppName&ThumbMod=None&isLimitImage=1&ThumWidth=1920&ThumHeight=550&ThumPassSizeKB=1&isSaveOriginalImage=true';
+                            $.ajaxSettings.async = false;
+                            $.getJSON("http://upload.kecq.com/file/Policy?" + params, data = {
+                                fileName: file.name, size: file.size
+                            }, function (result) {
+                                if (result.code < 0) {
+                                    uploader.option('server', 'http://upload.kecq.com/file/Cancel');
+                                    alert(result.message);
+                                    uploader.stop(file);
+                                }
+                                else {
+                                    if (result.mode == "upyun") {
+                                        uploader.option('server', result.url);
+                                        uploader.option('formData', { policy: result.policy, signature: result.signature });
+                                    }
+                                }
+                            });
+                        });
+
+                        // 文件上传过程中创建进度条实时显示。
+                        uploader.on('uploadProgress', function (file, percentage) {
+                            $("#progressdiv").removeClass("hidden");
+                            $(".progress-bar").css('width', percentage * 100 + '%');
+                        });
+
+                        uploader.on('uploadSuccess', function (file, response) {
+
+                            $("#successdiv").show();
+                            //alert("上传完成");
+                            var data = response;
+
+                            if (data.code == 1) {
+                                $("#showImage").attr("src", data.url);
+                                $("#id_lastImageName_mainPic").val(data.url);
+                                $("#id_lastImageID_mainPic").val(data.relationID);
+                            } else if (data.code == 200) {
+                                $("#showImage").attr("src", "http://img.kecq.com" + data.url);
+                                $("#id_lastImageName_mainPic").val("http://img.kecq.com" + data.url);
+                                //$("#id_lastImageID_mainPic").val(data.relationID);
+
+                                if (data['image-width'] != null) {
+                                    $.getJSON("http://upload.kecq.com/file/SaveImageSize", data = {
+                                        fileUrl: encodeURIComponent("http://img.kecq.com" + data.url), width: data['image-width'], height: data['image-height']
+                                    }, function (result) {
+
+                                    });
+                                }
+                            }
+                            else {
+                                alert("服务器处理失败：返回" + data.message);
+                            }
+                        });
+
+                        uploader.on('uploadError', function (file) {
+                            alert("上传出错");
+                        });
+
+                        uploader.on('uploadComplete', function (file) {
+                            $("#progressdiv").addClass("hidden");
+                        });
+                    </script>
+
+                </td>
+                <td></td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    排序:
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.OrderWeight, new { @style = "height:24px" })
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.OrderWeight)</td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    添加时间：
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.ADD_DATE, new { @readonly = "readonly",style="height:24px" })
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.ADD_DATE)</td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    修改时间：
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.UPDATE_DATE, new { @readonly = "readonly", style = "height:24px" })
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.UPDATE_DATE)</td>
+            </tr>
+        </tbody>
+    </table>
+
+}
+

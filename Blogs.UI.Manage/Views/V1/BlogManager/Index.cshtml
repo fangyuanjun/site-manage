@@ -1,0 +1,149 @@
+﻿
+@{
+    ViewBag.Title = "博客管理";
+    Layout = "~/Views/V1/Shared/_Index_Layout.cshtml";
+}
+
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+
+
+<table id="List"></table>
+<script type="text/javascript">
+    $(function () {
+        $('#List').datagrid({
+            url: '/BlogManager/GetList',
+            width: $(window).width() - 10,
+            methord: 'post',
+            height: $(window).height() - 35,
+            fitColumns: true,
+            sortName: 'ADD_DATE',
+            sortOrder: 'desc',
+            idField: 'blogID',
+            pageSize: 15,
+            pageList: [15, 20, 30, 40, 50],
+            pagination: false,
+            striped: true, //奇偶行是否区分
+            singleSelect: false,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                { field: 'ID', title: '选择', width: 80, checkbox: true },
+                { field: 'blogID', title: '博客ID', width: 100, hidden: true },
+                { field: 'blogName', title: '博客名', width: 100, sortable: true },
+                { field: 'blogTitle', title: '标题', width: 200, sortable: true },
+                { field: 'blogLogo', title: 'LOGO', width: 50, sortable: true },
+                { field: 'blogDomain', title: '域名', width: 50, sortable: true },
+                { field: 'themeID', title: '主题', width: 50, sortable: true },
+                { field: 'blogIsDisabled', title: '禁用', width: 50, sortable: true },
+                { field: 'ADD_DATE', title: '创建时间', width: 60, align: 'center', sortable: true },
+                { field: 'UPDATE_DATE', title: '更新时间', width: 60, align: 'center', sortable: true }
+            ]],
+            toolbar: [{
+                id: 'btnadd',
+                text: '添加',
+                iconCls: 'icon-add',
+                handler: function () {
+                    //实现弹出添加信息的层
+                    ShowCreateDialog();
+                }
+            }, '-', {
+                id: 'btncut',
+                text: '修改',
+                iconCls: 'icon-cut',
+                handler: function () {
+
+                    //实现弹出修改信息的层
+                    ShowUpdateDialog();
+                }
+            }, '-', {
+                id: 'btnsave',
+                text: '删除',
+                iconCls: 'icon-remove',
+                handler: function () {
+                    //删除信息
+                    DeleteInfoByClick();
+                }
+            }]
+        });
+    });
+</script>
+<script type="text/javascript">
+
+    //ifram 返回
+    function frameReturnByClose() {
+        $("#modalwindow").window('close');
+    }
+    //iframe 返回并刷新
+    function frameReturnByReload(flag) {
+        if (flag)
+            $("#List").datagrid('load');
+        else
+            $("#List").datagrid('reload');
+    }
+    //输出信息
+    function frameReturnByMes(mes) {
+        $.messageBox5s('提示', mes);
+    }
+
+    function ShowCreateDialog() {
+        window.open("/BlogManager/Create");
+    }
+
+    function ShowUpdateDialog() {
+        var row = $('#List').datagrid('getSelections');
+        if (row.length == 0) {
+            alert("请选择要编辑的记录");
+            return false;
+        }
+        else if (row.length > 1) {
+            alert("不能同时编辑多行");
+            return false;
+        }
+        else {
+            window.open("/BlogManager/Edit/"+ row[0].ID);
+        }
+    }
+
+    function DeleteInfoByClick() {
+        var row = $('#List').datagrid('getSelections');
+        if (row.length == 0) {
+            alert("请选择要删除的记录");
+            return false;
+        }
+
+        var ids = ""; //不能赋值为null
+        for (var i = 0; i < row.length; i++) {
+            ids += row[i].ID + ",";
+        }
+
+        if (confirm("确定要删除选定的记录吗？")) {
+            $.ajax({
+                type: "POST",
+                url: "/BlogManager/Delete",
+                data: "ids=" + ids,
+                dataType: "json",
+                beforeSend: function () {
+                    //showOverlay();
+                },
+                success: function (data) {
+                    //hideOverlay();
+                    if (data.code == 1) {
+                        //重新加载当前页
+                        $("#List").datagrid('reload');
+                        //清除所有选定
+                        $('#List').datagrid('clearSelections');
+                        $.messageBox5s('提示', "删除成功");
+                    }
+                    else {
+                        $.messageBox5s('提示', data.message);
+                    }
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    //hideOverlay();
+                    alert("错误");
+                    document.write(XMLHttpRequest.responseText);
+                }
+            });
+        }
+    }
+
+</script>

@@ -1,0 +1,191 @@
+﻿@model Blogs.UI.Manage.ArticleViewModel
+
+@{
+    Layout = null;
+    var contentModel = ViewData["content"] as Blogs.Entity.blog_tb_article_content;
+    if (contentModel == null)
+    {
+        contentModel = new Blogs.Entity.blog_tb_article_content();
+    }
+}
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>编辑文章(简易)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="http://static.kecq.com/style/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+
+    <script src="http://static.kecq.com/js/jquery-1.12.4.min.js" type="text/javascript"></script>
+    <script src="http://static.kecq.com/js/My97DatePicker/WdatePicker.js" type="text/javascript"></script>
+
+    <link href="https://static.kecq.com/include/toastr/toastr.min.css" rel="stylesheet" />
+    <script src="https://static.kecq.com/include/toastr/toastr.min.js" type="text/javascript"></script>
+
+
+    <script type="text/javascript" charset="utf-8" src="/ueditor/ueditor.config.js"></script>
+    <script type="text/javascript" charset="utf-8" src="/ueditor/ueditor.all.min.js"> </script>
+    <!--建议手动加在语言，避免在ie下有时因为加载语言失败导致编辑器加载失败-->
+    <!--这里加载的语言文件会覆盖你在配置项目里添加的语言类型，比如你在配置项目里配置的是英文，这里加载的中文，那最后就是中文-->
+    <script type="text/javascript" charset="utf-8" src="/ueditor/lang/zh-cn/zh-cn.js"></script>
+
+    <script type="text/javascript">
+
+
+        $(function () {
+            $("#btnSave").click(function () {
+
+                if ($("#articleTitle").val() == "") {
+                    alert("请输入标题");
+                    return false;
+                }
+                if ($("#categoryID").val() == "") {
+                    alert("请选择分类");
+                    return false;
+                }
+                //editor1.sync();
+                //editor2.sync();
+                $.ajax({
+                    url: "/Article/Edit/" + $("#articleID").val(),
+                    type: "Post",
+                    data: $("#EditForm").serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.code == 1) {
+                            alert(data.message);
+                            location.reload();
+                        }
+                        else {
+                            alert(data.message);
+                        }
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        alert(textStatus + ":" + errorThrown);
+                    }
+                });
+
+            });
+        })
+
+    </script>
+    <style>
+        .control-label {
+            max-width: 100px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid" style="margin-top:10px">
+        @using (Html.BeginForm("Edit", null, FormMethod.Post, new { Id = "EditForm", @class = "form-horizontal" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+
+            <div class="hidden">
+                <input name="objectID" value="@ViewData["objectID"]" />
+            </div>
+
+            @Html.HiddenFor(model => model.articleID)
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label">分类</label>
+                <div class="col-sm-10">
+                    @Html.DropDownListFor(model => model.categoryID, ViewData["categorySelect"] as SelectList, new { @class = "form-control", @editable = "false" })
+                    @Html.ValidationMessageFor(model => model.categoryID)
+                </div>
+            </div>
+
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.articleTitle, new { @class = "col-sm-2 control-label", style = "color:red;" })
+                <div class="col-sm-10">
+                    @Html.TextBoxFor(model => model.articleTitle, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.articleTitle)
+                </div>
+            </div>
+
+            @Html.TextBoxForBoot(model => model.articleAuthor)
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label"></label>
+                <div class="col-sm-10">
+                    <p id="tempContentTips" style="color:red"></p>
+                    <script id="articleContent" name="articleContent" type="text/plain" style="width:100%;height:500px">
+                        @Html.Raw(contentModel.articleContent)
+                    </script>
+
+                    <script type="text/javascript">
+
+                            var ue = UE.getEditor('articleContent', {
+                                serverUrl: "@Utility.UploadUrl"
+                                //serverUrl: "/config.json"
+                            });
+                            ue.ready(function () {
+                                ue.execCommand('serverparam', 'objectID', '@ViewData["objectID"]');
+                                ue.execCommand('serverparam', 'isLimitImage', '1');
+                                ue.execCommand('serverparam', 'appName', '@Blogs.UI.Manage.UserInfo.AppName');
+                                ue.execCommand('serverparam', 'objectTag', 'articleContentHtml');
+                                ue.execCommand('serverparam', 'mod', 'ueditor');
+                                ue.execCommand('serverparam', 'subDir', 'article');
+                                ue.execCommand('serverparam', 'thumbMod', 'W');
+                                ue.execCommand('serverparam', 'thumWidth', '960');
+                                ue.execCommand('serverparam', 'thumHeight', '640');
+                                ue.execCommand('serverparam', 'thumPassSizeKB', '300');
+                            });
+
+                            //每隔30秒执行
+                            window.setInterval(function () {
+                                //editor1.sync();
+                                var objectID = $("input[name='objectID']").val();
+                                var content = ue.getContent();
+                                $.ajax({
+                                    url: "/Article/SaveTempContent",
+                                    type: "Post",
+                                    data: { objectID: objectID, articleContent: content },
+                                    dataType: "json",
+                                    success: function (data) {
+                                        if (data.code == 1) {
+                                            $("#tempContentTips").text(data.message);
+                                        }
+                                        else {
+                                            $("#tempContentTips").text(data.message);
+                                        }
+                                    },
+                                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                                        $("#tempContentTips").text("草稿保存错误");
+                                        //document.write(XMLHttpRequest.responseText);
+                                    }
+                                });
+                            }, 30000);
+                    </script>
+                </div>
+            </div>
+
+
+            @Html.TextBoxForBoot(model => model.articleSource)
+
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label" for="articleSubContentText">描述文本</label>
+                <div class="col-sm-10">
+                    <textarea cols="20" rows="3" class="form-control" name="articleSubContentText" id="articleSubContentText">@contentModel.articleSubContentText</textarea>
+                    <small style="color:gray">填写文章的简介，一般建议截取第一段,如果设置了描述html,则描述文本将失效并且不会保存</small>
+                </div>
+            </div>
+
+            @Html.InputForDate(model => model.articleDatetime)
+            @Html.TextBoxForBootReadonly(model => model.ADD_DATE)
+            @Html.TextBoxForBootReadonly(model => model.UPDATE_DATE)
+
+            <div class="form-group">
+                <div class="col-sm-12">
+                    <button id="btnSave" type="button" class="btn btn-primary btn-lg" >添加/修改</button>
+                </div>
+            </div>
+
+
+        }
+    </div>
+</body>
+</html>

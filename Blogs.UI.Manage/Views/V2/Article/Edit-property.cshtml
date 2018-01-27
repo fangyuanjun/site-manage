@@ -1,0 +1,479 @@
+﻿@model Blogs.UI.Manage.ArticleViewModel
+
+@{
+    Layout = null;
+    var contentModel = ViewData["content"] as Blogs.Entity.blog_tb_article_content;
+    if (contentModel == null)
+    {
+        contentModel = new Blogs.Entity.blog_tb_article_content();
+    }
+}
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>编辑文章</title>
+    <link href="http://static.kecq.com/style/admin/css/style.css" rel="stylesheet" type="text/css" />
+    <script src="http://static.kecq.com/js/jquery-1.12.4.min.js" type="text/javascript"></script>
+    <script src="http://static.kecq.com/js/My97DatePicker/WdatePicker.js" type="text/javascript"></script>
+    <link href="http://static.kecq.com/js/jBox/Skins/Blue/jbox.css" rel="stylesheet" type="text/css" />
+    <script src="http://static.kecq.com/js/jBox/jquery.jBox-2.3.min.js" type="text/javascript"></script>
+
+    <script src="http://static.kecq.com/js/bigcolorpicker-2.3/js/jquery.bigcolorpicker.min.js" type="text/javascript"></script>
+    <link href="http://static.kecq.com/js/bigcolorpicker-2.3/css/jquery.bigcolorpicker.css" rel="stylesheet" type="text/css" />
+
+
+    <script src="http://static.kecq.com/js/jquery-easyui-1.5.1/jquery.easyui.min.js" type="text/javascript"></script>
+    <link href="http://static.kecq.com/js/jquery-easyui-1.5.1/themes/default/easyui.css" rel="stylesheet" />
+    <script src="http://static.kecq.com/js/jquery.easyui.plus.js" type="text/javascript"></script>
+    <link href="http://static.kecq.com/js/jquery-easyui-1.5.1/themes/icon.css" rel="stylesheet" />
+
+    <style>
+        .field-validation-valid {
+            color: red;
+        }
+    </style>
+    <script type="text/javascript">
+
+
+        $(function () {
+            $("#btnSave").click(function () {
+
+                if ($("#articleTitle").val() == "") {
+                    alert("请输入标题");
+                    return false;
+                }
+                if ($("#categoryID").combobox('getValue') == "") {
+                    alert("请选择分类");
+                    return false;
+                }
+                //editor1.sync();
+                //editor2.sync();
+                $.ajax({
+                    url: "/Article/Edit/" + $("#articleID").val(),
+                    type: "Post",
+                    data: $("#EditForm").serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.code == 1) {
+                            alert(data.message);
+                            location.reload();
+                        }
+                        else {
+                            alert(data.message);
+                        }
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        alert(textStatus + ":" + errorThrown);   //XMLHttpRequest.responseText
+                    }
+                });
+
+            });
+        })
+
+        $().ready(function () {
+            $("table tr td:nth-child(1)").css('background-color', '#EAF8FD');
+            $("table tr td:nth-child(2)").css('background-color', '#F8FCFE');
+            $("#articleTitleColor").hide();
+            $("#storyTitleColorClear").click(function () {
+                $("#storyTitleColor").css("backgroundColor", "");
+                $("#articleTitleColor").val("");
+            });
+            $("#storyTitleColor").bigColorpicker(function (el, color) {
+                $(el).css("backgroundColor", color);
+                $("#articleTitleColor").val(color);
+            });
+
+            $('#blogID').combobox({
+                onSelect: function (record) {
+                    var url = '/Article/GetCategoryJson?blogID=' + $(this).combobox('getValue');
+                    $('#categoryID').combobox({
+                        valueField: 'categoryID',
+                        textField: 'TextWithTreeSpace',
+                        url: url,
+                        setValue: ''
+                    });
+
+                    $('#topicID').combobox({
+                        valueField: 'topicID',
+                        textField: 'topicDisplay',
+                        url: '/Article/GetTopicJson?blogID=' + $(this).combobox('getValue'),
+                        setValue: ''
+                    });
+
+                    //$.ajax({
+                    //    url: "/Article/TagString/" + $(this).combobox('getValue'),
+                    //    type: "Post",
+                    //    data: $("#EditForm").serialize(),
+                    //    dataType: "text",
+                    //    success: function (data) {
+                    //        alert(data);
+                    //    },
+                    //    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    //        //hideOverlay();
+                    //        alert("错误");
+                    //        document.write(XMLHttpRequest.responseText);
+                    //    }
+                    //});
+                }
+            });
+
+        });
+    </script>
+</head>
+<body>
+
+    @using (Html.BeginForm("Edit", null, FormMethod.Post, new { Id = "EditForm" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.ValidationSummary(true)
+
+        <table class="table_edit" style="background-color: #CDEAFA; width: 100%;">
+            <tr style="display:none">
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.articleID)：
+                </td>
+                <td>
+                    <input name="objectID" value="@ViewData["objectID"]" />
+                    <input name="uploadID1" value="@ViewData["uploadID1"]" />
+                    <input name="uploadID2" value="@ViewData["uploadID2"]" />
+                    @Html.EditorFor(model => model.articleID)
+                    @Html.ValidationMessageFor(model => model.articleID)
+                </td>
+            </tr>
+
+            @if ((ViewData["siteCategorySelect"] as SelectList).Count() > 0)
+            {
+                <tr>
+                    <td style="width: 100px;">系统分类</td>
+                    <td>
+                        @Html.DropDownListFor(model => model.siteCategoryID, ViewData["siteCategorySelect"] as SelectList, new { @class = "easyui-combobox", @style = "width:150px", @editable = "false" })
+                        @Html.ValidationMessageFor(model => model.siteCategoryID)
+                    </td>
+                </tr>
+
+            }
+
+            <tr>
+                <td style="width: 100px;">分类</td>
+                <td>
+                    @Html.DropDownListFor(model => model.categoryID, ViewData["categorySelect"] as SelectList, new { @class = "easyui-combobox", @style = "width:150px", @editable = "false" })
+                    @Html.ValidationMessageFor(model => model.categoryID)
+                </td>
+            </tr>
+
+
+            <tr>
+                <td>
+                    @Html.LabelFor(model => model.articleTitle, new { style = "color:red" })
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.articleTitle, new { @style = "width:400px;" })
+                    @Html.ValidationMessageFor(model => model.articleTitle)
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    @Html.LabelFor(model => model.articleSourceUrl)
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.articleSourceUrl, new { @style = "width:400px;" })
+                    @Html.ValidationMessageFor(model => model.articleSourceUrl)
+                </td>
+            </tr>
+
+
+            <tr>
+                <td style="width: 100px;">@Html.LabelFor(model => model.topicID)</td>
+                <td>
+                    @Html.DropDownListFor(model => model.topicID, ViewData["TopicSelect"] as SelectList, @"---请选择---", new { @class = "easyui-combobox", @style = "width:150px", @editable = "false" })
+                    @Html.ValidationMessageFor(model => model.topicID)
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    @Html.LabelFor(model => model.articleTitleColor)
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.articleTitleColor)
+                    <a href="javascript:void(0)" id="storyTitleColor" style="width: 35px; border: solid 1px #F0F0F0; height: 35px; display: block; float: left; background: @Model.articleTitleColor"></a>
+                    <a href="javascript:;" id="storyTitleColorClear" style="display: block; float: left; margin-top: 20px;">清除</a>
+                </td>
+            </tr>
+
+            @if (Model.AttachmentCollection.Count() > 0)
+            {
+                <tr>
+                    <td>
+                        附件
+                    </td>
+                    <td>
+                        @foreach (var item in Model.AttachmentCollection)
+                        {
+                            <p style="line-height: 16px;">
+                                <img style="vertical-align: middle; margin-right: 2px;" src="@item.icon" />
+                                <a style="font-size:16px; color:#0066cc;" href="@item.fileUrl">@item.Name @item.SizeString</a> 下载次数(@item.DownloadCount)
+                            </p>
+                        }
+                    </td>
+                </tr>
+            }
+
+            <tr>
+                <td>
+                    @Html.LabelFor(model => model.attachmentLimit)
+                </td>
+                <td>
+                    @{
+                        Blogs.Entity.AttachmentLimit attachementlimit = (Blogs.Entity.AttachmentLimit)Enum.Parse(typeof(Blogs.Entity.AttachmentLimit), Model.articleAttachmentLimit + "");
+                        bool b1 = (attachementlimit & Blogs.Entity.AttachmentLimit.禁止未登录用户下载) == Blogs.Entity.AttachmentLimit.禁止未登录用户下载;
+                        bool b2 = (attachementlimit & Blogs.Entity.AttachmentLimit.禁止未回复用户下载) == Blogs.Entity.AttachmentLimit.禁止未回复用户下载;
+                        bool b3 = (attachementlimit & Blogs.Entity.AttachmentLimit.禁止下载) == Blogs.Entity.AttachmentLimit.禁止下载;
+                        string checked1 = (b1 ? "checked=\"checked\"" : "");
+                        string checked2 = (b2 ? "checked=\"checked\"" : "");
+                        string checked3 = (b3 ? "checked=\"checked\"" : "");
+                    }
+                    <input type="checkbox" value="1" name="chkAttachmentLimit" @checked1 />禁止未登录用户下载
+                    <input type="checkbox" value="2" name="chkAttachmentLimit" @checked2 />禁止未回复用户下载
+                    <input type="checkbox" value="3" name="chkAttachmentLimit" @checked3 />禁止下载
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    @Html.LabelFor(model => model.articleSource)
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.articleSource, new { @style = "width:340px;" })
+                    @Html.ValidationMessageFor(model => model.articleSource)
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    @Html.LabelFor(model => model.articleAuthor)
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.articleAuthor, new { @style = "width:340px;" })
+                    @Html.ValidationMessageFor(model => model.articleAuthor)
+                </td>
+            </tr>
+
+
+
+
+            <tr>
+                <td>
+                    标签
+                </td>
+                <td>
+                    <input id="txt_tag" name="txt_tag" style="width:340px" value="@ViewData["tagString"]" />
+                    <div id="Panel_tag">
+                        @{
+                            foreach (var item in (SelectList)(ViewData["TagSelect"]))
+                            {
+                                string chkid = "chk" + item.Value;
+                                string checkedstring = "";
+                                if (item.Selected)
+                                {
+                                    checkedstring = "checked=\"checked\"";
+                                }
+                                <input type="checkbox" id="@chkid" value="@item.Value" @checkedstring />
+                                <label for="@chkid">@item.Text</label>
+                            }
+                        }
+                        <script type="text/javascript">
+                            function RTrim(str) {
+                                var i;
+                                for (i = str.length - 1; i >= 0; i--) {
+                                    if (str.charAt(i) != "," && str.charAt(i) != " ") break;
+                                }
+                                str = str.substring(0, i + 1);
+                                return str;
+                            }
+
+                            $(document).ready(function () {
+                                $("#Panel_tag").find(":checkbox").bind("click", function () {
+                                    //$(this).attr("checked", !$(this).attr("checked"));
+                                    var txt = $("label[for='" + $(this).attr("id") + "']").text();
+                                    // var reg = /^$/;
+                                    var reg = new RegExp("(" + txt + ",)|(," + txt + ")|(^" + txt + "$)");
+                                    var t = RTrim($("#txt_tag").val());
+                                    if (!reg.exec(t)) {
+                                        if (($(this).attr("checked") == "checked")) {
+                                            if (t == null || t.length == 0) {
+                                                $("#txt_tag").val(txt);
+                                            }
+                                            else {
+                                                $("#txt_tag").val(t + "," + txt);
+                                            }
+                                        }
+                                    }
+                                    else {
+                                        if (($(this).attr("checked") != "checked")) {
+                                            //alert(t.match(reg)[0]);
+                                            var t2 = t.replace(reg, "");
+                                            $("#txt_tag").val(t2);
+                                        }
+                                    }
+                                });
+                            });
+                        </script>
+                    </div>
+                    <p class="tips">用英文逗号隔开</p>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    @Html.LabelFor(model => model.articleKeywords)
+                </td>
+                <td>
+                    @Html.TextAreaFor(model => model.articleKeywords, new { @style = "width:700px; height:50px;" })
+                    @Html.ValidationMessageFor(model => model.articleKeywords)
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    @Html.LabelFor(model => model.articleDescription)
+                </td>
+                <td>
+                    @Html.TextAreaFor(model => model.articleDescription, new { @style = "width:700px; height:100px;" })
+                    @Html.ValidationMessageFor(model => model.articleDescription)
+                </td>
+            </tr>
+
+  
+
+            <tr>
+                <td>
+                    描述文本
+                </td>
+                <td>
+                    <textarea style="width:700px;height:100px;" rows="2" cols="20" name="articleSubContentText" id="articleSubContentText">@contentModel.articleSubContentText</textarea>
+                    <p class="tips">填写文章的简介，一般建议截取第一段,如果设置了描述html,则描述文本将失效并且不会保存</p>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    回复可见内容
+                </td>
+                <td>
+                    <textarea style="width:700px;height:100px;" name="articleHideContent" id="articleHideContent">@contentModel.articleHideContent</textarea>
+                </td>
+            </tr>
+
+
+            <tr>
+                <td>
+                    @Html.LabelFor(model => model.articleDatetime)
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.articleDatetime, new { @class = "Wdate", @onfocus = "WdatePicker({dateFmt:'yyyy/MM/dd HH:mm:ss'})" })
+                    @Html.ValidationMessageFor(model => model.articleDatetime)
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    添加时间
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.ADD_DATE, new { @disabled = "disabled" })
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    修改时间
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.UPDATE_DATE, new { @disabled = "disabled" })
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    @Html.LabelFor(model => model.articleOrder)
+                </td>
+                <td>
+                    @Html.EditorFor(model => model.articleOrder)
+                    @Html.ValidationMessageFor(model => model.articleOrder)
+                    <p class="tips">越大越靠前</p>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    @Html.LabelFor(model => model.articlePassword)
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.articlePassword)
+                    @Html.ValidationMessageFor(model => model.articlePassword)
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    选项
+                </td>
+                <td>
+                    @Html.CheckBoxFor(model => model.articleIsPic)  @Html.LabelFor(model => model.articleIsPic) &nbsp;
+                    @Html.CheckBoxFor(model => model.articleIsHidden)  @Html.LabelFor(model => model.articleIsHidden) &nbsp;
+                    @Html.CheckBoxFor(model => model.articleIsDisabled)  @Html.LabelFor(model => model.articleIsDisabled) &nbsp;
+                    @Html.CheckBoxFor(model => model.articleIsOriginal)  @Html.LabelFor(model => model.articleIsOriginal) &nbsp;
+                    @Html.CheckBoxFor(model => model.articleIsTop)  @Html.LabelFor(model => model.articleIsTop) &nbsp;
+                    @Html.CheckBoxFor(model => model.IsShowSource)  @Html.LabelFor(model => model.IsShowSource) &nbsp;
+
+                    @Html.CheckBoxFor(model => model.IsDisableComment)  @Html.LabelFor(model => model.IsDisableComment) &nbsp;
+                    @Html.CheckBoxFor(model => model.IsVerifyComment)  @Html.LabelFor(model => model.IsVerifyComment) &nbsp;
+                    @Html.CheckBoxFor(model => model.IsDisabledAnonymouComment)  @Html.LabelFor(model => model.IsDisabledAnonymouComment)
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    状态
+                </td>
+                <td>
+                    @Html.CheckBoxFor(model => model.articleIsIndex, new { @disabled = "disabled" })  @Html.LabelFor(model => model.articleIsIndex) &nbsp;
+                    @Html.CheckBoxFor(model => model.articleIsSystem, new { @disabled = "disabled" })  @Html.LabelFor(model => model.articleIsSystem) &nbsp;
+                </td>
+            </tr>
+
+            <tr>
+                <td>主题</td>
+                <td>
+                    <select id="themeID" name="themeID">
+                        <option value=""></option>
+                        <option value="SimpleShow">SimpleShow</option>
+                    </select>
+                </td>
+            </tr>
+
+            <tr>
+                <td></td>
+                <td>
+                    <input type="checkbox" id="chkIsUpdateIndex" name="chkIsUpdateIndex" value="是否更新索引" />
+                    更新索引
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    &nbsp;
+                </td>
+                <td>
+                    <input type="button" id="btnSave" value="提交" class="button" />
+                </td>
+            </tr>
+        </table>
+
+                            }
+</body>
+</html>

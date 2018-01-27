@@ -1,0 +1,156 @@
+﻿@{
+    ViewBag.Title = "菜单管理";
+    Layout = "~/Views/V1/Shared/_Index_Layout.cshtml";
+}
+
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+
+
+<table id="List"></table>
+<script type="text/javascript">
+    $(function () {
+        $('#List').treegrid({
+            url: '/Menu/GetList',
+            methord: 'post',
+            fitColumns: true,
+            sortName: 'ADD_DATE',
+            sortOrder: 'desc',
+            idField: 'menuID',
+            treeField: "menuDisplay",
+            pageSize: 15,
+            pageList: [15, 20, 30, 40, 50],
+            pagination: false,
+            striped: true, //奇偶行是否区分
+            singleSelect: false,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                { field: 'ID', title: '选择', width: 80, checkbox: true },
+                { field: 'menuID', title: '选择', width: 80, hidden: true },
+                { field: 'menuDisplay', title: '显示名称', width: 100, sortable: true },
+                { field: 'menuUrl', title: '链接地址', width: 150, sortable: true },
+                {
+                  field: "menuPic", title: "<b>图片<b>", width: 90, align: "center", formatter: function (value) {
+                        return '<img src=\'' + value + '\' width="70" height="60" style="margin: 5px;" />';
+                    }
+                },
+                { field: 'menuIsDisabled', title: '禁用', width: 50, sortable: true },
+                { field: 'menuOrder', title: '排序权重', width: 50, sortable: true },
+                { field: 'menuTarget', title: '打开方式', width: 80, sortable: true },
+                { field: 'ADD_DATE2', title: '创建时间', width: 60, align: 'center', sortable: true },
+                { field: 'UPDATE_DATE2', title: '修改时间', width: 60, align: 'center', sortable: true }
+            ]],
+            toolbar: [{
+                id: 'btnadd',
+                text: '添加',
+                iconCls: 'icon-add',
+                handler: function () {
+                    //实现弹出添加信息的层
+                    ShowCreateDialog();
+                }
+            }, '-', {
+                id: 'btncut',
+                text: '修改',
+                iconCls: 'icon-cut',
+                handler: function () {
+
+                    //实现弹出修改信息的层
+                    ShowUpdateDialog();
+                }
+            }, '-', {
+                id: 'btnsave',
+                text: '删除',
+                iconCls: 'icon-remove',
+                handler: function () {
+                    //删除信息
+                    DeleteInfoByClick();
+                }
+            }],
+            onLoadError: function () {
+                alert("加载错误");
+            }
+        });
+    });
+</script>
+<script type="text/javascript">
+
+    //ifram 返回
+    function frameReturnByClose() {
+        $("#modalwindow").window('close');
+    }
+    //iframe 返回并刷新
+    function frameReturnByReload(flag) {
+        //if (flag)
+        //    $("#List").datagrid('load');
+        //else
+        $("#List").treegrid('reload');
+    }
+    //输出信息
+    function frameReturnByMes(mes) {
+        $.messageBox5s('提示', mes);
+    }
+
+    function ShowCreateDialog() {
+        $("#modalwindow").html("<iframe width='100%' height='98%' scrolling='no' frameborder='0'' src='/Menu/Edit/0'></iframe>");
+        $("#modalwindow").window({ title: '新增', width: 700, height: 430, iconCls: 'icon-add' }).window('open');
+    }
+
+    function ShowUpdateDialog() {
+        var row = $('#List').treegrid('getSelections');
+        if (row.length == 0) {
+            alert("请选择要删除的记录");
+            return false;
+        }
+        else if (row.length > 1) {
+            alert("不能同时编辑多行");
+            return false;
+        }
+        else {
+            $("#modalwindow").html("<iframe width='100%' height='99%'  frameborder='0' src='/Menu/Edit/" + row[0].ID + "'></iframe>");
+            $("#modalwindow").window({ title: '编辑', width: 700, height: 430, iconCls: 'icon-edit' }).window('open');
+        }
+    }
+
+    function DeleteInfoByClick() {
+        var row = $('#List').treegrid('getSelections');
+        if (row.length == 0) {
+            alert("请选择要删除的记录");
+            return false;
+        }
+
+        var ids = ""; //不能赋值为null
+        for (var i = 0; i < row.length; i++) {
+            ids += row[i].ID + ",";
+        }
+
+        if (confirm("确定要删除选定的记录吗？")) {
+            $.ajax({
+                type: "POST",
+                url: "/Menu/Delete",
+                data: "ids=" + ids,
+                dataType: "text",
+                beforeSend: function () {
+                    //showOverlay();
+                },
+                success: function (msg) {
+                    //hideOverlay();
+                    data = eval("(" + msg + ")"); //转换为json对象
+                    if (data.code == 1) {
+                        //重新加载当前页
+                        $("#List").treegrid('reload');
+                        //清除所有选定
+                        $('#List').treegrid('clearSelections');
+                        $.messageBox5s('提示', "删除成功");
+                    }
+                    else {
+                        $.messageBox5s('提示', "删除失败");
+                    }
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    //hideOverlay();
+                    alert("错误");
+                    document.write(XMLHttpRequest.responseText);
+                }
+            });
+        }
+    }
+</script>

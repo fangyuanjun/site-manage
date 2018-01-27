@@ -1,0 +1,150 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>设置域名</title>
+    <link href="http://static.kecq.com/style/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+
+    <script src="http://static.kecq.com/js/jquery-1.12.4.min.js" type="text/javascript"></script>
+    <script src="http://static.kecq.com/js/template.js" type="text/javascript"></script>
+
+</head>
+<body>
+    <div class="container" >
+        <div class="row">
+            <div class="col-xs-12 form-group">
+                <button id="btnAdd" type="button" class="btn btn-default"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> 添加</button>
+            </div>
+
+        </div>
+
+        <div class="panel panel-default hidden" id="div_add">
+            <div class="panel-heading">添加域名</div>
+            <div class="panel-body">
+                <div class="row" style="margin-top:10px">
+                    <div class="col-sm-6 col-xs-5 form-group">
+                        <div class="input-group">
+                            <span class="input-group-addon">域名</span>
+                            <input id="add_domain" type="text" class="form-control">
+                        </div>
+                    </div>
+
+
+                    <div class="col-sm-3 col-xs-3 form-group">
+                       
+                            <input id="add_port" type="number" placeholder="端口" class="form-control">
+                        
+                    </div>
+                    <div class="col-sm-3 col-xs-4 form-group">
+                        <button id="btnAddAction" type="button" class="btn btn-primary"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span>保存</button>
+                        <button id="btnCancel" type="button" class="btn btn-danger"> 取消</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+       
+        <div id="tbody"></div>
+        <script type="text/html" id="tbody_t">
+
+            {{each data}}
+            <div class="row">
+                <div class="col-sm-6 col-xs-5 form-group">
+                    <div class="input-group">
+                        <span class="input-group-addon">域名</span>
+                        <input type="text" id="domain_{{$value.ID}}" value="{{$value.domain}}" class="form-control">
+                    </div>
+                </div>
+
+                <div class="col-sm-3 col-xs-3 form-group">
+                    
+                        <input type="number" id="port_{{$value.ID}}" placeholder="端口" value="{{$value.port}}" class="form-control">
+                  
+                </div>
+                <div class="col-sm-3 col-xs-4 form-group">
+                    <button id="btnDelete" onclick="modify('{{$value.ID}}')" type="button" class="btn btn-primary"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span>保存</button>
+                    <button id="btnDelete" onclick="deletedomain('{{$value.ID}}')" type="button" class="btn btn-danger"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> 删除</button>
+                </div>
+            </div>
+
+            {{/each}}
+        </script>
+    </div>
+
+    <script type="text/javascript">
+        $("#btnAdd").click(function () {
+            $("#div_add").removeClass("hidden");
+            $("#add_domain").val("");
+            $("#add_port").val("");
+        });
+
+        $("#btnCancel").click(function () {
+            $("#div_add").addClass("hidden");
+        });
+
+        $("#btnAddAction").click(function () {
+            var domain = $("#add_domain").val();
+            var port = $("#add_port").val();
+            if (port == "") {
+                alert("请输入端口号");
+                return false;
+            }
+            $.post('/BlogManager/AddDomain/@ViewBag.blogID', { domain: domain, port: port },
+                function (result, status) {
+                    if (result.code > 0) {
+                        $("#div_add").addClass("hidden");
+                        $("#add_domain").val("");
+                        $("#add_port").val("");
+                        load();
+                    }
+                }, "json");
+
+        });
+
+        var load = function () {
+            $.get("/BlogManager/GetDomainList/@ViewBag.blogID", function (result) {
+                var tbody = template('tbody_t', result);
+                $("#tbody").html("");
+                $("#tbody").append(tbody);
+            }, "json");
+        }
+
+        function modify(id) {
+ 
+            var domain = $("#domain_" + id).val();
+            var port = $("#port_" + id).val();
+            if (port == "") {
+                alert("请输入端口号");
+                return false;
+            }
+            $.post('/BlogManager/UpdateDomain/'+id+'', { domain: domain, port: port },
+                function (result, status) {
+                    if (result.code > 0) {
+                        alert(result.message);
+                        load();
+                    }
+                }, "json");
+        }
+
+        function deletedomain(id) {
+
+            $.post('/BlogManager/DeleteDomain/'+id, 
+                function (result, status) {
+                    if (result.code > 0) {
+                        load();
+                    }
+                }, "json");
+        }
+
+        $(document).ready(function () {
+            load();
+        })
+    </script>
+</body>
+</html>

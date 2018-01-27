@@ -1,0 +1,241 @@
+﻿@model Blogs.UI.Manage.Models.Blog
+
+@{
+    Layout = null;
+
+}
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>编辑博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="http://static.kecq.com/style/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="http://static.kecq.com/js/jquery-3.1.1.min.js" type="text/javascript"></script>
+    <script src="http://static.kecq.com/style/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+    <script src="http://static.kecq.com/js/jquery/jquery.metadata.js" type="text/javascript"></script>
+    <script src="http://static.kecq.com/include/jquery-validation-1.10.0/jquery.validate.min.js" type="text/javascript"></script>
+    <script src="http://static.kecq.com/include/jquery-validation-1.10.0/messages_zh.js" type="text/javascript"></script>
+    <script src="http://static.kecq.com/js/fyj/jquery.validate.extend.js" type="text/javascript"></script>
+
+    <link href="http://static.kecq.com/include/toastr/toastr.min.css" rel="stylesheet" />
+    <script src="http://static.kecq.com/include/toastr/toastr.min.js" type="text/javascript"></script>
+
+    <script src="http://static.kecq.com/js/My97DatePicker/WdatePicker.js" type="text/javascript"></script>
+
+    <link href="http://static.kecq.com/js/webuploader0.1.5/webuploader.css" rel="stylesheet" />
+    <script src="http://static.kecq.com/js/webuploader0.1.5/webuploader.min.js"></script>
+
+    <link href="http://static.kecq.com/js/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css" rel="stylesheet" />
+    <script src="http://static.kecq.com/js/bootstrap-switch/js/bootstrap-switch.min.js" type="text/javascript"></script>
+
+</head>
+<body>
+    <div class="container-fluid">
+        @using (Html.BeginForm("Edit", null, FormMethod.Post, new { Id = "EditForm", @class = "form-horizontal" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+
+            @Html.HiddenFor(model => model.blogID)
+            if (Model.blogID == 0)
+            {
+                @Html.TextBoxForBoot(model => model.blogName)
+            }
+            else
+            {
+                @Html.TextBoxForBootReadonly(model => model.blogName)
+            }
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label" for="articleSubContentText">Logo</label>
+                <div class="col-sm-10">
+                    <div id="uploader" class="wu-example" style="width:100px;">
+                        <div id="successdiv" style="width: 100px; height: 75px; z-index: 200; display:none; position: absolute; background: url(http://static.kecq.com/js/webuploader0.1.5/images/success.png) no-repeat right bottom; "></div>
+                        <!--用来存放文件信息-->
+                        <div id="fillist" class="uploader-list">
+                            <img id="showImage" src="@ViewBag.Pic" width="100" height="75" />
+                        </div>
+                        <div class="progress progress-striped active hidden" id="progressdiv">
+                            <div class="progress-bar" role="progressbar" style="width: 10%">
+                            </div>
+                        </div>
+                        <div id="picker">上传</div>
+                        <input type="hidden" id="id_lastImageID_mainPic" value="" />
+                        <input type="hidden" id="id_lastImageName_mainPic" value="http://static.kecq.com/images/common/nopic.jpg" name="lastImageName_mainPic" />
+                    </div>
+
+
+
+                    <script type="text/javascript">
+
+                        // 优化retina, 在retina下这个值是2
+                        ratio = window.devicePixelRatio || 1,
+
+                        // 缩略图大小
+                        thumbnailWidth = 100 * ratio,
+                        thumbnailHeight = 75 * ratio;
+
+                        var uploader = WebUploader.create({
+                            // 自动上传。
+                            auto: true,
+                            //限制单选
+                            multiple: false,
+                            swf: 'http://static.kecq.com/js/webuploader/Uploader.swf',
+                            server: '@Utility.UploadUrl?objectID=@Blogs.UI.Manage.UserInfo.BlogID&objectTag=mainPic&objectType=blog&pathFormat={}&subDir=logo&appName=@Blogs.UI.Manage.UserInfo.AppName&ThumbMod=None&isLimitImage=1&ThumWidth=220&ThumHeight=70&ThumPassSizeKB=1',
+                            pick: '#picker',
+                            // 不压缩image, 默认如果是jpeg，文件上传前会压缩一把再上传！
+                            resize: false,
+                            // 只允许选择文件，可选。
+                            accept: {
+                                title: 'Images',
+                                extensions: 'gif,jpg,jpeg,bmp,png',
+                                mimeTypes: 'image/*'
+                            }
+                        });
+
+                        // 当有文件被添加进队列的时候
+                        uploader.on('fileQueued', function (file) {
+
+                            // 创建缩略图
+                            uploader.makeThumb(file, function (error, src) {
+                                if (error) {
+                                    //$("#showImage").replaceWith('<span>不能预览</span>');
+                                    alert("不能预览图片");
+                                    return;
+                                }
+
+                                $("#showImage").attr('src', src);
+                            }, thumbnailWidth, thumbnailHeight);
+                        });
+
+                        // 文件上传过程中创建进度条实时显示。
+                        uploader.on('uploadProgress', function (file, percentage) {
+                            $("#progressdiv").removeClass("hidden");
+                            $(".progress-bar").css('width', percentage * 100 + '%');
+                        });
+
+                        uploader.on('uploadSuccess', function (file, response) {
+                            $("#successdiv").show();
+                            //alert("上传完成");
+                            var data = response;
+                            if (data.code == 1) {
+                                $("#showImage").attr("src", data.url);
+                                $("#id_lastImageName_mainPic").val(data.url);
+                                $("#id_lastImageID_mainPic").val(data.relationID);
+                            }
+                            else {
+                                alert("服务器处理失败：返回" + data.message);
+                            }
+                        });
+
+                        uploader.on('uploadError', function (file) {
+                            alert("上传出错");
+                        });
+
+                        uploader.on('uploadComplete', function (file) {
+                            $("#progressdiv").addClass("hidden");
+                        });
+                    </script>
+                </div>
+            </div>
+
+            @Html.TextBoxForBoot(model => model.blogTitle)
+            @Html.TextBoxForBoot(model => model.blogSubTitle)
+            @Html.TextBoxForBoot(model => model.blogDomain)
+            @Html.TextBoxForBoot(model => model.Port)
+            @Html.TextBoxForBoot(model => model.blogOrder)
+            @Html.InputForTextarea(model => model.blogKeywords)
+            @Html.InputForTextarea(model => model.blogDescription)
+            @Html.InputForTextarea(model => model.beian)
+            @Html.InputForTextarea(model => model.tongji)
+            @Html.InputForTextarea(model => model.AboutMe)
+            @Html.TextBoxForBoot(model => model.QQ)
+            @Html.TextBoxForBoot(model => model.QQGroup)
+            @Html.TextBoxForBoot(model => model.QQLink)
+            @Html.TextBoxForBoot(model => model.Weibo)
+            @Html.TextBoxForBoot(model => model.WeiboLink)
+            @Html.TextBoxForBoot(model => model.Email)
+            @Html.TextBoxForBoot(model => model.Tel)
+            @Html.TextBoxForBoot(model => model.Address)
+            @Html.TextBoxForBoot(model => model.Weixin)
+            @Html.InputForSelect(model => model.themeID)
+            @Html.InputForSwitch(model => model.blogIsDisabled)
+            @Html.InputForSwitch(model => model.IsMustSSL)
+            @Html.InputForSwitch(model => model.IsCloseComment)
+            @Html.InputForSwitch(model => model.IsCloseBoard)
+            @Html.TextBoxForBootReadonly(model => model.ADD_DATE)
+            @Html.TextBoxForBootReadonly(model => model.UPDATE_DATE)
+
+            <div class="form-group">
+                <div class="col-sm-12">
+                    <button id="btnSave" type="button" class="btn btn-primary btn-lg btn-block">添加/修改</button>
+                </div>
+            </div>
+
+        }
+    </div>
+
+    <script type="text/javascript">
+
+        //$("input[type='checkbox']").on('change', function (e) {
+        //    $('#_' + e.target.id).val(e.target.checked);
+        //});
+        $("input[type='checkbox']").bootstrapSwitch({
+            onSwitchChange: function (e, state) {
+                $('#_' + e.target.id).val(e.target.checked);
+            }
+        });
+      
+        $.ajax({
+            url: "/BlogManager/EditModel/" + $("#blogID").val(),
+            dataType: "json",
+            success: function (result) {
+                $.each(result.themes, function (index, v) {
+                    $("#themeID").append("<option value='" + v.themeID + "'>" + v.themeID + "</option>");
+                });
+
+                for (var key in result.data) {
+                    if ($("#" + key)) {
+                        $("#" + key).val(result.data[key]);
+                    }
+                }
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                alert(textStatus + ":" + errorThrown);
+            }
+        });
+
+        $("#btnSave").click(function () {
+            if ($("#EditForm").valid()) {
+                $.ajax({
+                    url: "/BlogManager/Edit/" + $("#blogID").val(),
+                    type: "Post",
+                    data: $("#EditForm").serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.code == 1) {
+                            toastr.success("操作成功");
+                            $('.ok', parent.document).click();
+                        }
+                        else {
+                            toastr.error(data.message);
+                        }
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        alert(textStatus + ":" + errorThrown);
+                    }
+                });
+
+            }
+        });
+
+        $("#EditForm").validate({
+            meta: "validate"
+        });
+    </script>
+</body>
+</html>
+

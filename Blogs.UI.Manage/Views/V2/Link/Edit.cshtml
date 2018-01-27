@@ -1,0 +1,115 @@
+﻿
+@model Blogs.UI.Manage.Models.Link
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>编辑友情链接</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="https://static.kecq.com/style/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://static.kecq.com/js/jquery-3.1.1.min.js" type="text/javascript"></script>
+    <script src="https://static.kecq.com/style/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+    <script src="https://static.kecq.com/js/jquery/jquery.metadata.js" type="text/javascript"></script>
+    <script src="https://static.kecq.com/include/jquery-validation-1.10.0/jquery.validate.min.js" type="text/javascript"></script>
+    <script src="https://static.kecq.com/include/jquery-validation-1.10.0/messages_zh.js" type="text/javascript"></script>
+    <script src="https://static.kecq.com/js/fyj/jquery.validate.extend.js" type="text/javascript"></script>
+
+    <script src="https://static.kecq.com/js/My97DatePicker/WdatePicker.js" type="text/javascript"></script>
+    <link href="https://static.kecq.com/js/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css" rel="stylesheet" />
+    <script src="https://static.kecq.com/js/bootstrap-switch/js/bootstrap-switch.min.js" type="text/javascript"></script>
+
+    <link href="https://static.kecq.com/include/toastr/toastr.min.css" rel="stylesheet" />
+    <script src="https://static.kecq.com/include/toastr/toastr.min.js" type="text/javascript"></script>
+
+</head>
+<body>
+    <div class="container-fluid" style="margin-top:5px;">
+        @using (Html.BeginForm("Edit", null, FormMethod.Post, new { Id = "EditForm", @class = "form-horizontal" }))
+        {
+        @Html.AntiForgeryToken()
+        @Html.ValidationSummary(true)
+
+       @Html.HiddenFor(model => model.linkID)
+       @Html.TextBoxForBoot(model => model.linkName)
+       @Html.TextBoxForBoot(model => model.linkUrl)
+       @Html.TextBoxForBoot(model => model.linkPic)
+       @Html.TextBoxForBoot(model => model.linkOrder)
+       @Html.InputForSwitch(model => model.linkIsDisabled)
+       @Html.TextBoxForBootReadonly(model => model.ADD_DATE)
+       @Html.TextBoxForBootReadonly(model => model.UPDATE_DATE)
+
+
+        <div class="form-group">
+            <div class="col-sm-12">
+                <button id="btnSave" type="button" class="btn btn-primary btn-lg btn-block">添加/修改</button>
+            </div>
+        </div>
+
+        }
+    </div>
+
+    <script type="text/javascript">
+        $(function () {
+
+            $("input[type='checkbox']").bootstrapSwitch({
+                onSwitchChange: function (e, state) {
+                    $('#_' + e.target.id).val(e.target.checked);
+                }
+            });
+
+            $.ajax({
+                url: "/Link/EditModel/" + $("#linkID").val(),
+                dataType: "json",
+                success: function (result) {
+                    //$.each(result.catelist, function (index, v) {
+                    //    $("#parentID").append("<option value='" + v.linkID + "'>" + v.TextWithTreeSpace + "</option>");
+                    //});
+
+                    for (var key in result.data) {
+                        if ($("#" + key)) {
+                            $("#" + key).val(result.data[key]);
+                        }
+                    }
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert(textStatus + ":" + errorThrown);
+                }
+            });
+
+                $("#btnSave").click(function () {
+                    if ($("#EditForm").valid()) {
+                        $.ajax({
+                            url: "/Link/Edit/" + $("#linkID").val(),
+                            type: "Post",
+                            data: $("#EditForm").serialize(),
+                            dataType: "json",
+                            success: function (data) {
+                                if (data.code == 1) {
+                                    toastr.success("操作成功");
+                                    $('.ok', parent.document).click();
+                                }
+                                else {
+                                    alert(data.message);
+                                }
+                            },
+                            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                                alert(textStatus + ":" + errorThrown);
+                            }
+                        });
+
+                    }
+                });
+            })
+
+            $("#EditForm").validate({
+                meta: "validate"
+            });
+    </script>
+</body>
+</html>

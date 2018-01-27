@@ -1,0 +1,171 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>菜单管理</title>
+    <script src="https://static.kecq.com/js/jquery-1.12.4.min.js" type="text/javascript"></script>
+    <link href="https://static.kecq.com/style/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://static.kecq.com/js/jquery-easyui-1.5.1/jquery.easyui.min.js" type="text/javascript"></script>
+    <link href="https://static.kecq.com/js/jquery-easyui-1.5.1/themes/default/easyui.css" rel="stylesheet" />
+    <link href="https://static.kecq.com/js/jquery-easyui-1.5.1/themes/icon.css" rel="stylesheet" />
+
+    <script src="https://static.kecq.com/style/bootstrap-3.3.5/js/bootstrap.min.js" type="text/javascript"></script>
+
+    <link href="https://static.kecq.com/include/toastr/toastr.min.css" rel="stylesheet" />
+    <script type="text/javascript" src="https://static.kecq.com/include/toastr/toastr.min.js"></script>
+    <script type="text/javascript" src="https://static.kecq.com/js/fyj/diag.js"></script>
+
+</head>
+<body>
+    <div style="padding:5px 5px 0px 5px;">
+        <table id="List"></table>
+        <script type="text/javascript">
+    $(function () {
+        $('#List').treegrid({
+            url: '/Menu/GetList',
+            methord: 'post',
+            fitColumns: true,
+            sortName: 'ADD_DATE',
+            sortOrder: 'desc',
+            idField: 'menuID',
+            treeField: "menuDisplay",
+            pageSize: 15,
+            pageList: [15, 20, 30, 40, 50],
+            pagination: false,
+            striped: true, //奇偶行是否区分
+            singleSelect: false,//单选模式
+            rownumbers: false,//行号
+            columns: [[
+                { field: 'menuID', title: '选择', width: 80, checkbox: true },
+                { field: 'menuDisplay', title: '显示名称', width: 100, sortable: true },
+                { field: 'menuUrl', title: '链接地址', width: 150, sortable: true },
+                {
+                  field: "menuPic", title: "<b>图片<b>", width: 90, align: "center", formatter: function (value) {
+                        return '<img src=\'' + value + '\' width="70" height="60" style="margin: 5px;" />';
+                    }
+                },
+                { field: 'menuIsDisabled', title: '禁用', width: 50, sortable: true },
+                { field: 'menuOrder', title: '排序权重', width: 50, sortable: true },
+                { field: 'menuTarget', title: '打开方式', width: 80, sortable: true },
+                { field: 'ADD_DATE', title: '创建时间', width: 60, align: 'center', sortable: true },
+                { field: 'UPDATE_DATE', title: '修改时间', width: 60, align: 'center', sortable: true }
+            ]],
+            toolbar: [{
+                id: 'btnadd',
+                text: '添加',
+                iconCls: 'icon-add',
+                handler: function () {
+                    //实现弹出添加信息的层
+                    ShowCreateDialog();
+                }
+            }, '-', {
+                id: 'btncut',
+                text: '修改',
+                iconCls: 'icon-cut',
+                handler: function () {
+
+                    //实现弹出修改信息的层
+                    ShowUpdateDialog();
+                }
+            }, '-', {
+                id: 'btnsave',
+                text: '删除',
+                iconCls: 'icon-remove',
+                handler: function () {
+                    //删除信息
+                    DeleteInfoByClick();
+                }
+            }, '-', {
+                id: 'btnfresh',
+                text: '刷新',
+                iconCls: 'icon-reload',
+                handler: function () {
+                    $("#List").treegrid('reload');
+                }
+            }],
+            onLoadError: function () {
+                alert("加载错误");
+            }
+        });
+    });
+        </script>
+        <script type="text/javascript">
+
+    
+    function ShowCreateDialog() {
+
+        Fwin.iframe({
+            title: "添加菜单", url: "/Menu/Edit/0", height: 700, onOk: function (e) {
+                toastr.success("操作成功");
+                //重新加载当前页
+                $("#List").treegrid('reload');
+                //清除所有选定
+                $('#List').treegrid('clearSelections');
+                return true;
+            }
+        });
+    }
+
+    function ShowUpdateDialog() {
+        var row = $('#List').treegrid('getSelections');
+        if (row.length == 0) {
+            alert("请选择要删除的记录");
+            return false;
+        }
+        else if (row.length > 1) {
+            alert("不能同时编辑多行");
+            return false;
+        }
+        else {
+            Fwin.iframe({
+                title: "修改菜单", url: "/Menu/Edit/" + row[0].menuID, height: 700, onOk: function (e) {
+                    toastr.success("操作成功");
+                    //重新加载当前页
+                    $("#List").treegrid('reload');
+                    //清除所有选定
+                    $('#List').treegrid('clearSelections');
+                    return true;
+                }
+            });
+        }
+    }
+
+    function DeleteInfoByClick() {
+        var row = $('#List').treegrid('getSelections');
+        if (row.length == 0) {
+            alert("请选择要删除的记录");
+            return false;
+        }
+
+        var ids = ""; //不能赋值为null
+        for (var i = 0; i < row.length; i++) {
+            ids += row[i].menuID + ",";
+        }
+
+        if (confirm("确定要删除选定的记录吗？")) {
+            $.ajax({
+                type: "POST",
+                url: "/Menu/Delete",
+                data: "ids=" + ids,
+                dataType: "json",
+                success: function (data) {
+                    if (data.code == 1) {
+                        //重新加载当前页
+                        $("#List").treegrid('reload');
+                        //清除所有选定
+                        $('#List').treegrid('clearSelections');
+                        toastr.success("删除成功", '提示');
+                    }
+                    else {
+                        toastr.error(data.message, '提示');
+                    }
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert(textStatus + ":" + errorThrown);
+                }
+            });
+        }
+    }
+        </script>
+        </div>
+</body>
+</html>

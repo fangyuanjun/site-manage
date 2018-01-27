@@ -1,0 +1,152 @@
+﻿@model Blogs.UI.Manage.Models.Menu
+
+@{
+    ViewBag.Title = "修改";
+    Layout = "~/Views/V1/Shared/_Index_LayoutEdit.cshtml";
+}
+
+<script type="text/javascript">
+    $(function () {
+        $("#btnSave").click(function () {
+            if ($("#EditForm").valid()) {
+                $.ajax({
+                    url: "/Menu/Edit/" + $("#menuID").val(),
+                    type: "Post",
+                    data: $("#EditForm").serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.code == 1) {
+                            window.parent.frameReturnByMes(data.message);
+                            window.parent.frameReturnByReload(true);
+                            window.parent.frameReturnByClose();
+                        }
+                        else {
+                            window.parent.frameReturnByMes(data.message);
+                        }
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        //hideOverlay();
+                        alert("错误");
+                        document.write(XMLHttpRequest.responseText);
+                    }
+                });
+            }
+        });
+    })
+</script>
+
+<div class="mvctool bgb">
+    <a id="btnSave" style="float: left;" class="l-btn l-btn-plain"><span class="l-btn-left"><span class="l-btn-text icon-save" style="padding-left: 20px;">保存</span></span></a>
+</div>
+
+@using (Html.BeginForm("Edit", "Member", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <table class="fromEditTable setTextWidth300">
+        <tbody>
+            <tr style="display:none">
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.menuID)：
+                </td>
+                <td>
+                    @Html.EditorFor(model => model.menuID)
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.menuID)</td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.parentID)：
+                </td>
+                <td>
+                    @Html.DropDownListFor(model => model.parentID, ViewData["Parent"] as SelectList)
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.parentID)</td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.menuDisplay)：
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.menuDisplay)
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.menuDisplay)</td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.menuUrl)：
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.menuUrl)
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.menuUrl)</td>
+            </tr>
+
+            @*<tr>
+                <td>
+                    图片
+                </td>
+                <td>
+                    <uc1:UploadFile ID="UploadFile2" runat="server" ThumWidth="480" ThumHeight="360" UploadDir="pic" IsImage="true" />
+                </td>
+            </tr>*@
+
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.menuOrder)：
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.menuOrder)
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.menuOrder)</td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.menuTarget)：
+                </td>
+                <td>
+                    @Html.DropDownListFor(model => model.menuTarget, ViewData["menuTarget"] as SelectList)
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.menuTarget)</td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.menuIsDisabled)：
+                </td>
+                <td>
+                    @Html.CheckBoxFor(model => model.menuIsDisabled)
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.menuIsDisabled)</td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.ADD_DATE)：
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.ADD_DATE, new { @readonly = "readonly" })
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.ADD_DATE)</td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.UPDATE_DATE)：
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.UPDATE_DATE, new { @readonly = "readonly" })
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.UPDATE_DATE)</td>
+            </tr>
+        </tbody>
+    </table>
+
+}
+

@@ -1,0 +1,110 @@
+﻿@model Blogs.Entity.blog_tb_Photo
+
+@{
+    ViewBag.Title = "修改";
+    Layout = "~/Views/V2/Shared/_Index_LayoutEdit.cshtml";
+}
+
+<script type="text/javascript">
+    $(function () {
+        $("#btnSave").click(function () {
+            if ($("#EditForm").valid()) {
+                $.ajax({
+                    url: "/Photo/Edit/" + $("#ID").val(),
+                    type: "Post",
+                    data: $("#EditForm").serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.code == 1) {
+                            window.parent.frameReturnByMes(data.message);
+                            window.parent.frameReturnByReload(true);
+                            window.parent.frameReturnByClose();
+                        }
+                        else {
+                            window.parent.frameReturnByMes(data.message);
+                        }
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        //hideOverlay();
+                        alert("错误");
+                        document.write(XMLHttpRequest.responseText);
+                    }
+                });
+            }
+        });
+    })
+</script>
+
+<div class="mvctool bgb">
+    <a id="btnSave" style="float: left;" class="l-btn l-btn-plain"><span class="l-btn-left"><span class="l-btn-text icon-save" style="padding-left: 20px;">保存</span></span></a>
+</div>
+
+@using (Html.BeginForm("Edit", "Photo", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <table class="fromEditTable setTextWidth300">
+        <tbody>
+            <tr style="display:none">
+                <td style="width:100px; text-align:right;">
+         
+                </td>
+                <td>
+                    @Html.EditorFor(model => model.ID)
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.ID)</td>
+            </tr>
+
+            <tr>
+                <td style="width: 100px; text-align: right;">相册</td>
+                <td>
+                    @Html.DropDownListFor(model => model.AlbumID, ViewData["albumSelect"] as SelectList, new { @class = "easyui-combobox", @style = "width:150px", @editable = "false" })
+                    @Html.ValidationMessageFor(model => model.AlbumID)
+                </td>
+            </tr>
+          
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    显示名:
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.Display)
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.Display)</td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    权限:
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.Permission)
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.Permission)</td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.ADD_DATE)：
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.ADD_DATE, new { @readonly = "readonly" })
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.ADD_DATE)</td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.UPDATE_DATE)：
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.UPDATE_DATE, new { @readonly = "readonly" })
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.UPDATE_DATE)</td>
+            </tr>
+        </tbody>
+    </table>
+
+}
+

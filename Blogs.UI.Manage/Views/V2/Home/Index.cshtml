@@ -1,0 +1,232 @@
+﻿@{
+    Layout = null;
+
+}
+
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>后台管理系统-@Blogs.UI.Manage.UserInfo.BlogTitle</title>
+
+    <link rel="stylesheet" href="https://static.kecq.com/include/admin-lte-2.3.11/bootstrap/css/bootstrap.min.css" />
+    <link href="https://static.kecq.com/include/font-awesome-4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="https://static.kecq.com/include/ionicons-2.0.1/css/ionicons.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://static.kecq.com/include/admin-lte-2.3.11/dist/css/AdminLTE.css" />
+    <link rel="stylesheet" href="https://static.kecq.com/include/admin-lte-2.3.11/dist/css/skins/_all-skins.min.css" />
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+
+    <script type="text/javascript">
+
+        function iFrameHeight() {
+            $(".taskiframe").css("height", document.body.scrollHeight - 100);
+        }
+
+        window.onresize = function () {
+            iFrameHeight();
+        }
+
+        // window.setInterval("iFrameHeight()", 500); //定时开始
+
+        var opentab = function (id, title, url) {
+            $("#tasktab li").removeClass("active");
+            $(".taskiframe").hide();
+            //改变左边菜单激活状态
+            $("li.treeview").removeClass("active");
+            $("#" + id + "_menu").addClass("active");
+            //$(obj).parent().addClass("active");
+
+            if ($("#" + id + "_tab") && $("#" + id + "_tab").html() != null) {
+                $("#" + id + "_tab").addClass("active");
+                $("#" + id + "_content").show();
+                //$("#taskiframe").attr("src", url);
+            } else {
+                var html = "<li id='" + id + "_tab' class='active'><a  href=\"javascript:opentab('" + id + "','" + title + "','" + url + "');\"><span>" + title + "</span>&nbsp;<span type='button' class='close' onclick=\"return closetab('" + id + "');\" ><span  style='color:red'>&times;</span></span></a></li>";
+                $("#tasktab").append(html);
+                var html2 = '<iframe class="taskiframe" id="' + id + '_content" scrolling="auto" frameborder="0" src="' + url + '" style="width: 100%; height: 100%;" onLoad="iFrameHeight()"></iframe>';
+                $("#tabContent").append(html2);
+                iFrameHeight();
+            }
+        }
+
+        var closetab = function (id) {
+            $("#" + id + "_tab").remove();
+            $("#" + id + "_content").remove();
+            $("#" + id + "_menu").removeClass("active");
+            return false; //一定要return false，阻止事件往上冒泡   同时onclick=""  也要加 return
+        }
+    </script>
+</head>
+
+<body class="hold-transition skin-blue sidebar-mini">
+    <div class="wrapper">
+        <header class="main-header">
+            <a href="/" class="logo">
+                <!-- LOGO -->
+                <span class="logo-mini">
+                    <div class="fa fa-desktop"></div>
+                </span>
+                <span class="logo-lg">后台管理系统</span>
+            </a>
+            <!-- Header Navbar: style can be found in header.less -->
+            <nav class="navbar navbar-static-top" role="navigation">
+                <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+                    <span class="sr-only">Toggle navigation</span>
+                </a>
+                <!-- Navbar Right Menu -->
+                <div class="navbar-custom-menu">
+                    <ul class="nav navbar-nav">
+                        @{
+                            if (User.Identity.IsAuthenticated)
+                            {
+
+                 <!-- User Account: style can be found in dropdown.less -->
+                        <li class="dropdown user user-menu">
+                            <a href="http://user.kecq.com" target="_blank" class="dropdown-toggle" data-toggle="dropdown">
+                                <div class="fa fa-user-circle fa-lg"></div>
+                                <span class="hidden-xs">@Blogs.UI.Manage.UserInfo.UserName</span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <!-- User image -->
+                                <li class="user-header">
+                                    <div class="fa fa-user-circle fa-5x "></div>
+                                    <p>
+                                        Admin
+                                    </p>
+                                </li>
+
+                                <!-- Menu Footer-->
+                                <li class="user-footer">
+                                    <div class="pull-left">
+                                        <a href="http://user.kecq.com" target="_blank" class="btn btn-default btn-flat">个人资料</a>
+                                    </div>
+                                    <div class="pull-right">
+                                        <a href="/Account/Logout" class="btn btn-default btn-flat">注销登录</a>
+                                    </div>
+                                </li>
+                            </ul>
+                        </li>
+
+                            }
+                        }
+
+                    </ul>
+                </div>
+            </nav>
+        </header>
+
+        <div class="main-sidebar">
+            <!-- Inner sidebar -->
+            <div class="sidebar">
+
+                <!-- Sidebar Menu -->
+                <ul class="sidebar-menu">
+
+                    <li class="treeview" id="BlogManager_menu">
+                        <a href="javascript:opentab('BlogManager','博客管理','/BlogManager');">
+                            <i class="fa fa-list"></i>
+                            <span>博客管理</span>
+                        </a>
+                    </li>
+
+                    <li class="treeview" id="Article_menu">
+                        <a href="javascript:opentab('Article','文章管理','/Article');">
+                            <i class="fa fa-book"></i>
+                            <span>文章管理</span>
+                        </a>
+                    </li>
+
+                    <li class="treeview" id="Cate_menu">
+                        <a href="javascript:opentab('Cate','分类管理','/Cate');">
+                            <i class="fa fa-braille"></i>
+                            <span>分类管理</span>
+                        </a>
+                    </li>
+
+                    <li class="treeview" id="Topic_menu">
+                        <a href="javascript:opentab('Topic','专题管理','/Topic');">
+                            <i class="fa fa-cubes"></i>
+                            <span>专题管理</span>
+                        </a>
+                    </li>
+
+                    <li class="treeview" id="Tag_menu">
+                        <a href="javascript:opentab('Tag','标签管理','/Tag');">
+                            <i class="fa fa-tags"></i>
+                            <span>标签管理</span>
+                        </a>
+                    </li>
+
+                    <li class="treeview" id="Menu_menu">
+                        <a href="javascript:opentab('Menu','菜单管理','/Menu');">
+                            <i class="fa fa-inbox"></i>
+                            <span>菜单管理</span>
+                        </a>
+                    </li>
+                    <li class="treeview" id="Link_menu">
+                        <a href="javascript:opentab('Link','友情链接','/Link');">
+                            <i class="fa fa-link"></i>
+                            <span>友情链接</span>
+                        </a>
+                    </li>
+                    <li class="treeview" id="Talk_menu">
+                        <a href="javascript:opentab('Talk','碎言碎语','/Talk');">
+                            <i class="fa fa-pencil"></i>
+                            <span>碎言碎语</span>
+                        </a>
+                    </li>
+
+                    <li class="treeview" id="Favorite_menu">
+                        <a href="#">
+                            <i class="fa fa-image"></i>
+                            <span>图片管理</span>
+                            <span class="pull-right-container">
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            <li class="active"><a href="javascript:opentab('Album','相册管理','/Album','Album');"><i class="fa fa-circle-o"></i>相册管理</a></li>
+                            <li><a href="javascript:opentab('Photo','照片管理','/Photo','Photo');"><i class="fa fa-circle-o"></i>照片管理</a></li>
+                            <li><a href="javascript:opentab('Slider','大图管理','/Slider','Slider');"><i class="fa fa-circle-o"></i>大图管理</a></li>
+                        </ul>
+                    </li>
+
+                </ul>
+
+                <!-- /.sidebar-menu -->
+
+            </div>
+            <!-- /.sidebar -->
+        </div>
+        <!-- /.main-sidebar -->
+
+        <div class="content-wrapper">
+            <!-- Nav tabs -->
+            <ul class="nav nav-tabs" id="tasktab">
+                <li class="active" id="welcome_tab">
+                    <a href="javascript:opentab('Welcome','欢迎页','/Welcome');">
+                        <span>欢迎页</span>
+                        &nbsp;<span type="button" class="close" onclick="return closetab('welcome');"><span style="color: red">&times;</span></span>
+                    </a>
+                </li>
+            </ul>
+
+            <div id="tabContent" style="overflow: hidden">
+                <iframe id="welcome_content" class="taskiframe" scrolling="auto" frameborder="0" src="/Welcome" style="width: 100%; height: 100%;" onload="iFrameHeight()"></iframe>
+            </div>
+
+        </div>
+
+    </div>
+    <!-- ./wrapper -->
+    <script src="https://static.kecq.com/include/admin-lte-2.3.11/plugins/jQuery/jquery-2.2.3.min.js"></script>
+    <script src="https://static.kecq.com/include/admin-lte-2.3.11/bootstrap/js/bootstrap.min.js"></script>
+    <script src="https://static.kecq.com/include/admin-lte-2.3.11/dist/js/app.min.js"></script>
+
+</body>
+</html>

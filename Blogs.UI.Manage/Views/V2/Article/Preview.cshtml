@@ -1,0 +1,142 @@
+﻿@model Blogs.UI.Manage.ViewModel.ArticlePreviewViewModel
+@{
+    Layout = null;
+}
+
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>文章预览-@Model.Article.articleTitle</title>
+    <script type="text/javascript" src="http://static.kecq.com/js/jquery-1.12.4.min.js"></script>
+    <link href="http://static.kecq.com/style/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="container-fluid">
+        <h3 class="text-center">@Model.Article.articleTitle</h3>
+        <h5 class="text-center">
+            来源:@Model.Article.articleSource&nbsp;
+            作者:@Model.Article.articleAuthor&nbsp;
+            原文链接:<a href="@Model.Article.articleSourceUrl" target="_blank">@Model.Article.articleSourceUrl&nbsp;</a>
+            时间:@Model.Article.articleDatetime&nbsp;
+            阅读(0)&nbsp;
+            评论(0)&nbsp;
+            <a id="font_small">小</a>&nbsp;
+            <a id="font_middle">中</a>&nbsp;
+            <a id="font_big">大</a>&nbsp;
+        </h5>
+        <hr />
+        <div id="articleContent" style='font:18px/32px "Microsoft Yahei"'>
+            <!--正文开始-->
+
+            @(new HtmlString(Model.Content))
+
+            <!--正文结束-->
+        </div>
+
+    </div>
+
+    <!-- mw_syntaxhighlighter ver.3.0.83 Begin -->
+    <script type="text/javascript" src="http://static.kecq.com/js/syntaxhighlighter_3.0.83/scripts/shCore.js?ver=3.0.83"></script>
+    <script type="text/javascript" src="http://static.kecq.com/js/syntaxhighlighter_3.0.83/scripts/shAutoloader.js?ver=3.0.83"></script>
+    <script type="text/javascript" src="http://static.kecq.com/js/syntaxhighlighter_3.0.83/scripts/shBrushXml.js?ver=3.0.83"></script>
+    <script type="text/javascript">
+        //<![CDATA[
+        SyntaxHighlighter.autoloader(
+        "applescript	http://static.kecq.com/js/syntaxhighlighter_3.0.83/scripts/shBrushAppleScript.js?ver=3.0.83"
+        , "as3 actionscript3	http://static.kecq.com/js/syntaxhighlighter_3.0.83/scripts/shBrushAS3.js?ver=3.0.83"
+        , "bash shell	http://static.kecq.com/js/syntaxhighlighter_3.0.83/scripts/shBrushBash.js?ver=3.0.83"
+        , "cf coldfusion	http://static.kecq.com/js/syntaxhighlighter_3.0.83/scripts/shBrushColdFusion.js?ver=3.0.83"
+        , "cpp c	http://static.kecq.com/js/syntaxhighlighter_3.0.83/scripts/shBrushCpp.js?ver=3.0.83"
+        , "c# c-sharp csharp	http://static.kecq.com/js/syntaxhighlighter_3.0.83/scripts/shBrushCSharp.js?ver=3.0.83"
+        , "css	http://static.kecq.com/js/syntaxhighlighter_3.0.83/scripts/shBrushCss.js?ver=3.0.83"
+        , "delphi pas pascal	http://static.kecq.com/js/syntaxhighlighter_3.0.83/scripts/shBrushDelphi.js?ver=3.0.83"
+        , "diff patch	http://static.kecq.com/js/syntaxhighlighter_3.0.83/scripts/shBrushDiff.js?ver=3.0.83"
+        , "erl erlang	http://static.kecq.com/js/syntaxhighlighter_3.0.83/scripts/shBrushErlang.js?ver=3.0.83"
+        , "groovy	http://static.kecq.com/js/syntaxhighlighter_3.0.83/scripts/shBrushGroovy.js?ver=3.0.83"
+        , "java	http://static.kecq.com/js/syntaxhighlighter_3.0.83/scripts/shBrushJava.js?ver=3.0.83"
+        , "jfx javafx	http://static.kecq.com/js/syntaxhighlighter_3.0.83/scripts/shBrushJavaFX.js?ver=3.0.83"
+        , "js jscript javascript	http://static.kecq.com/js/syntaxhighlighter_3.0.83/scripts/shBrushJScript.js?ver=3.0.83"
+        , "perl pl	http://static.kecq.com/js/syntaxhighlighter_3.0.83/scripts/shBrushPerl.js?ver=3.0.83"
+        , "php	http://static.kecq.com/js/syntaxhighlighter_3.0.83/scripts/shBrushPhp.js?ver=3.0.83"
+        , "plain text	http://static.kecq.com/js/syntaxhighlighter_3.0.83/scripts/shBrushPlain.js?ver=3.0.83"
+        , "ps powershell	http://static.kecq.com/js/syntaxhighlighter_3.0.83/scripts/shBrushPowerShell.js?ver=3.0.83"
+        , "py python	http://static.kecq.com/js/syntaxhighlighter_3.0.83/scripts/shBrushPython.js?ver=3.0.83"
+        , "rails ror ruby rb	http://static.kecq.com/js/syntaxhighlighter_3.0.83/scripts/shBrushRuby.js?ver=3.0.83"
+        , "sass scss	http://static.kecq.com/js/syntaxhighlighter_3.0.83/scripts/shBrushSass.js?ver=3.0.83"
+        , "scala	http://static.kecq.com/js/syntaxhighlighter_3.0.83/scripts/shBrushScala.js?ver=3.0.83"
+        , "sql	http://static.kecq.com/js/syntaxhighlighter_3.0.83/scripts/shBrushSql.js?ver=3.0.83"
+        , "vb vbnet	http://static.kecq.com/js/syntaxhighlighter_3.0.83/scripts/shBrushVb.js?ver=3.0.83"
+        , "xml xhtml xslt html	http://static.kecq.com/js/syntaxhighlighter_3.0.83/scripts/shBrushXml.js?ver=3.0.83"
+        , "objc	http://static.kecq.com/js/syntaxhighlighter_3.0.83/scripts/shBrushObjC.js?ver=3.0.83"
+        );
+        SyntaxHighlighter.defaults['auto-links'] = true;
+        SyntaxHighlighter.defaults['quick-code'] = true;
+        SyntaxHighlighter.defaults['title'] = '';
+        SyntaxHighlighter.defaults['class-name'] = 'notranslate';
+        SyntaxHighlighter.defaults['collapse'] = false;
+        SyntaxHighlighter.defaults['first-line'] = 1;
+        SyntaxHighlighter.defaults['gutter'] = true;
+        SyntaxHighlighter.defaults['pad-line-numbers'] = 1;
+        SyntaxHighlighter.defaults['smart-tabs'] = true;
+        SyntaxHighlighter.defaults['tab-size'] = 4;
+        SyntaxHighlighter.defaults['toolbar'] = true;
+        SyntaxHighlighter.config.strings.expandSource = '+ expand source';
+        SyntaxHighlighter.config.strings.help = '?';
+        SyntaxHighlighter.config.strings.alert = 'SyntaxHighlighter';
+        SyntaxHighlighter.config.strings.noBrush = "Can\'t find brush for: ";
+        SyntaxHighlighter.config.strings.brushNotHtmlScript = "Brush wasn\'t configured for html-script option: ";
+        SyntaxHighlighter.all();
+        //]]></script>
+    <!-- mw_syntaxhighlighter ver.3.0.83 End -->
+
+
+    <script src="http://static.kecq.com/js/jquery/jquery.lazyload.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#articleContent img").lazyload({
+                effect: "fadeIn"
+            });
+
+            //$("img").error(function () {
+            //    $(this).attr('src', null);
+            //    $(this).attr('src', "http://static.kecq.com/images/common/imgerror.jpg");
+            //});
+        })
+
+      
+        $(window).load(function () {
+            $('img').each(function () {
+                if (!this.complete || typeof this.naturalWidth == "undefined" || this.naturalWidth == 0) {
+                    this.src = 'http://static.kecq.com/images/common/imgerror.jpg';
+                }
+            });
+        });
+
+        $("#font_small").click(function () {
+            $("#articleContent").css("font-size", "16px");
+            $("#articleContent p").css("font-size", "16px");
+            $("#articleContent span").css("font-size", "16px");
+            $("#articleContent br").css("font-size", "16px");
+        });
+
+        $("#font_middle").click(function () {
+            $("#articleContent").css("font-size", "24px");
+            $("#articleContent p").css("font-size", "24px");
+            $("#articleContent span").css("font-size", "24px");
+            $("#articleContent br").css("font-size", "24px");
+        });
+
+        $("#font_big").click(function () {
+            $("#articleContent").css("font-size", "32px");
+            $("#articleContent p").css("font-size", "32px");
+            $("#articleContent span").css("font-size", "32px");
+            $("#articleContent br").css("font-size", "32px");
+        });
+    </script>
+</body>
+</html>

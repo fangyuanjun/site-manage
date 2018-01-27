@@ -1,0 +1,432 @@
+﻿@model Blogs.UI.Manage.Models.Blog
+
+@{
+    ViewBag.Title = "编辑博客";
+    Layout = "~/Views/V1/Shared/_Index_LayoutEdit.cshtml";
+}
+
+<link href="http://static.kecq.com/style/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<link href="http://static.kecq.com/js/webuploader/webuploader.css" rel="stylesheet" />
+<script src="http://static.kecq.com/js/webuploader/webuploader.min.js"></script>
+
+<script type="text/javascript">
+    $(function () {
+        $("#btnSave").click(function () {
+            if ($("#EditForm").valid()) {
+                $.ajax({
+                    url: "/BlogManager/Edit/" + $("#blogID").val(),
+                    type: "Post",
+                    data: $("#EditForm").serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.code == 1) {
+                            alert(data.message);
+                        }
+                        else {
+                            alert(data.message);
+                        }
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        alert("错误");
+                        document.write(XMLHttpRequest.responseText);
+                    }
+                });
+            }
+        });
+    })
+</script>
+
+<div id="modalwindow" class="easyui-window" data-options="modal:true,closed:true,minimizable:false,shadow:false"></div>
+
+<div class="mvctool bgb">
+    <a id="btnSave" style="float: left;" class="l-btn l-btn-plain"><span class="l-btn-left"><span class="l-btn-text icon-save" style="padding-left: 20px;">保存</span></span></a>
+</div>
+
+@using (Html.BeginForm("Edit", "Blog", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <table class="fromEditTable setTextWidth300">
+        <tbody>
+            <tr style="display:none">
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.blogID)：
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.blogID)
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.blogID)</td>
+            </tr>
+
+            @if (Model.blogID == 0)
+            {
+                <tr>
+                    <td style="width:100px; text-align:right; color:red">
+                        @Html.LabelFor(model => model.blogName)：
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.blogName, new { @style = "height:24px" })
+                    </td>
+                    <td>@Html.ValidationMessageFor(model => model.blogName)</td>
+                </tr>
+            }
+            else
+            {
+                <tr>
+                    <td style="width:100px; text-align:right; color:red">
+                        @Html.LabelFor(model => model.blogName)：
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(model => model.blogName, new { @readonly = "readonly", @style = "height:24px" })
+                    </td>
+                    <td>@Html.ValidationMessageFor(model => model.blogName)</td>
+                </tr>
+            }
+
+
+            <tr>
+                <td style="width:100px; text-align:right; color:red">
+                    @Html.LabelFor(model => model.blogTitle)：
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.blogTitle, new { @style = "height:24px" })
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.blogTitle)</td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.blogSubTitle)：
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.blogSubTitle, new { @style = "height:24px" })
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.blogSubTitle)</td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    Logo:
+                </td>
+                <td>
+
+                    <div id="uploader" class="wu-example" style="width:100px;">
+                        <div id="successdiv" style="width: 100px; height: 75px; z-index: 200; display:none; position: absolute; background: url(http://static.kecq.com/js/webuploader/images/success.png) no-repeat right bottom; "></div>
+                        <!--用来存放文件信息-->
+                        <div id="fillist" class="uploader-list">
+                            <img id="showImage" src="@ViewBag.Pic" width="100" height="75" />
+                        </div>
+                        <div class="progress progress-striped active hidden" id="progressdiv">
+                            <div class="progress-bar" role="progressbar" style="width: 10%">
+                            </div>
+                        </div>
+                        <div id="picker">上传</div>
+                        <input type="hidden" id="id_lastImageID_mainPic" value="" />
+                        <input type="hidden" id="id_lastImageName_mainPic" value="http://static.kecq.com/images/common/nopic.jpg" name="lastImageName_mainPic" />
+                    </div>
+
+
+
+                    <script type="text/javascript">
+
+                        // 优化retina, 在retina下这个值是2
+                        ratio = window.devicePixelRatio || 1,
+
+                        // 缩略图大小
+                        thumbnailWidth = 100 * ratio,
+                        thumbnailHeight = 75 * ratio;
+
+                        var uploader = WebUploader.create({
+                            // 自动上传。
+                            auto: true,
+                            //限制单选
+                            multiple: false,
+                            swf: 'http://static.kecq.com/js/webuploader/Uploader.swf',
+                            server: '@Utility.UploadUrl?objectID=@Blogs.UI.Manage.UserInfo.BlogID&objectTag=mainPic&objectType=blog&pathFormat={}&subDir=logo&appName=@Blogs.UI.Manage.UserInfo.AppName&ThumbMod=None&isLimitImage=1&ThumWidth=220&ThumHeight=70&ThumPassSizeKB=1',
+                            pick: '#picker',
+                            // 不压缩image, 默认如果是jpeg，文件上传前会压缩一把再上传！
+                            resize: false,
+                            // 只允许选择文件，可选。
+                            accept: {
+                                title: 'Images',
+                                extensions: 'gif,jpg,jpeg,bmp,png',
+                                mimeTypes: 'image/*'
+                            }
+                        });
+
+                        // 当有文件被添加进队列的时候
+                        uploader.on('fileQueued', function (file) {
+
+                            // 创建缩略图
+                            uploader.makeThumb(file, function (error, src) {
+                                if (error) {
+                                    //$("#showImage").replaceWith('<span>不能预览</span>');
+                                    alert("不能预览图片");
+                                    return;
+                                }
+
+                                $("#showImage").attr('src', src);
+                            }, thumbnailWidth, thumbnailHeight);
+                        });
+
+                        // 文件上传过程中创建进度条实时显示。
+                        uploader.on('uploadProgress', function (file, percentage) {
+                            $("#progressdiv").removeClass("hidden");
+                            $(".progress-bar").css('width', percentage * 100 + '%');
+                        });
+
+                        uploader.on('uploadSuccess', function (file, response) {
+                            $("#successdiv").show();
+                            //alert("上传完成");
+                            var data = response;
+                            if (data.code == 1) {
+                                $("#showImage").attr("src", data.url);
+                                $("#id_lastImageName_mainPic").val(data.url);
+                                $("#id_lastImageID_mainPic").val(data.relationID);
+                            }
+                            else {
+                                alert("服务器处理失败：返回" + data.message);
+                            }
+                        });
+
+                        uploader.on('uploadError', function (file) {
+                            alert("上传出错");
+                        });
+
+                        uploader.on('uploadComplete', function (file) {
+                            $("#progressdiv").addClass("hidden");
+                        });
+                    </script>
+
+
+                </td>
+                <td></td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.blogDomain)：
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.blogDomain, new { @style = "height:24px" })
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.blogDomain)</td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.blogOrder)：
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.blogOrder, new { @style = "height:24px" })
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.blogOrder)</td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.blogIsDisabled)：
+                </td>
+                <td>
+                    @Html.CheckBoxFor(model => model.blogIsDisabled, new { @style = "height:24px" })
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.blogIsDisabled)</td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.blogKeywords)：
+                </td>
+                <td>
+                    @Html.TextAreaFor(model => model.blogKeywords)
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.blogKeywords)</td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.blogDescription)：
+                </td>
+                <td>
+                    @Html.TextAreaFor(model => model.blogDescription)
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.blogDescription)</td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.themeID)：
+                </td>
+                <td>
+                    @Html.DropDownListFor(model => model.themeID, ViewData["themeIDSelect"] as SelectList, new { @style = "height:24px" })
+                    @*@Html.TextBoxFor(model => model.themeID, new { @style = "height:24px" })*@
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.themeID)</td>
+            </tr>
+
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.beian)：
+                </td>
+                <td>
+                    @Html.TextAreaFor(model => model.beian)
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.beian)</td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.tongji)：
+                </td>
+                <td>
+                    @Html.TextAreaFor(model => model.tongji)
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.tongji)</td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.AboutMe)：
+                </td>
+                <td>
+                    @Html.TextAreaFor(model => model.AboutMe)
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.AboutMe)</td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.QQ)：
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.QQ, new { @style = "height:24px" })
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.QQ)</td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.QQGroup)：
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.QQGroup, new { @style = "height:24px" })
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.QQGroup)</td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.QQLink)：
+                </td>
+                <td>
+                    @Html.TextAreaFor(model => model.QQLink)
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.QQLink)</td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.Weibo)：
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.Weibo, new { @style = "height:24px" })
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.Weibo)</td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.WeiboLink)：
+                </td>
+                <td>
+                    @Html.TextAreaFor(model => model.WeiboLink)
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.WeiboLink)</td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.Email)：
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.Email, new { @style = "height:24px" })
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.Email)</td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.Tel)：
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.Tel, new { @style = "height:24px" })
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.Tel)</td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.Address)：
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.Address, new { @style = "height:24px" })
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.Address)</td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.QQWeibo)：
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.QQWeibo, new { @style = "height:24px" })
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.QQWeibo)</td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.QQWeiboLink)：
+                </td>
+                <td>
+                    @Html.TextAreaFor(model => model.QQWeiboLink)
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.QQWeiboLink)</td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.Weixin)：
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.Weixin, new { @style = "height:24px" })
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.Weixin)</td>
+            </tr>
+
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.ADD_DATE)：
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.ADD_DATE, new { @readonly = "readonly", @style = "height:24px" })
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.ADD_DATE)</td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.UPDATE_DATE)：
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.UPDATE_DATE, new { @readonly = "readonly", @style = "height:24px" })
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.UPDATE_DATE)</td>
+            </tr>
+        </tbody>
+    </table>
+}
+

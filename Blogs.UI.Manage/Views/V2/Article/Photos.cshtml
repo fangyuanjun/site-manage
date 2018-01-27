@@ -1,0 +1,65 @@
+﻿@model Blogs.UI.Manage.PhotoListViewModel
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="http://static.kecq.com/js/jquery-1.12.4.min.js" type="text/javascript"></script>
+    <title>文章图片浏览</title>
+</head>
+<body>
+    <ul style="list-style:none">
+        @{
+            foreach (var item in Model.PhotoCollection)
+            {
+                string url = Server.UrlEncode(item.Url);
+                string thumbUrl = Server.UrlEncode(item.ThumbUrl);
+                <li style="float:left;margin:10px;">
+                    <div>
+                        <a target="_blank" href="@item.Url">
+                            <img src="@item.Url" style="width:160px; height:90px;" />
+                        </a>
+                    </div>
+                    <div>
+                        <a href="javascript:SetFirstPic('@item.AlbumID','@url','@thumbUrl')">设为首页图</a>&nbsp;
+                    </div>
+                </li>
+            }
+        }
+
+    </ul>
+
+
+    <script type="text/javascript">
+    
+
+        function SetFirstPic(articleID, url, thumbUrl) {
+            $.ajax({
+                type: "POST",
+                url: "/Article/SetFirstPic?articleID=" + articleID + "&articlePic=" + url + "&articleThumbPic=" + thumbUrl,
+                data: "url=" + url,
+                dataType: "text",
+                beforeSend: function () {
+                    //showOverlay();
+                },
+                success: function (msg) {
+                    //hideOverlay();
+                    data = eval("(" + msg + ")"); //转换为json对象
+                    if (data.code == 1) {
+                        alert("设置成功");
+                    }
+                    else {
+                        alert("设置失败");
+                    }
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    //hideOverlay();
+                    alert("错误");
+                    document.write(XMLHttpRequest.responseText);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
+

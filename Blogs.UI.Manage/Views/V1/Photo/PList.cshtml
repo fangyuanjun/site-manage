@@ -1,0 +1,93 @@
+﻿@model Blogs.UI.Manage.PhotoListViewModel
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="http://static.kecq.com/js/jquery-1.12.4.min.js" type="text/javascript"></script>
+    <title>@Model.Title</title>
+</head>
+<body>
+    <ul style="list-style:none">
+        @{
+            foreach (var item in Model.PhotoCollection)
+            {
+                <li style="float:left;margin:10px;" id="li-@item.ID">
+                    <div>
+                        <a target="_blank" href="@item.Url">
+                            <img src="@item.ThumbUrl" style="width:160px; height:90px;" />
+                        </a>
+                    </div>
+                    <div>
+                        <a target="_blank" href="@item.Url">@item.Display</a>&nbsp;
+                        <a href="javascript:SetCover('@item.AlbumID','@item.ThumbUrl')">设封面</a>&nbsp;
+                        <a href="javascript:DeleteInfoByClick('@item.ID')">删除</a>
+                    </div>
+                </li>
+            }
+        }
+
+    </ul>
+
+
+    <script type="text/javascript">
+        function DeleteInfoByClick(id) {
+
+            if (confirm("确定要删除选定的记录吗？")) {
+                $.ajax({
+                    type: "POST",
+                    url: "/Photo/Delete",
+                    data: "ids=" + id,
+                    dataType: "text",
+                    beforeSend: function () {
+                        //showOverlay();
+                    },
+                    success: function (msg) {
+                        //hideOverlay();
+                        data = eval("(" + msg + ")"); //转换为json对象
+                        if (data.code == 1) {
+                            $("#li-" + id).hide();
+                        }
+                        else {
+                            alert("删除失败");
+                        }
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        //hideOverlay();
+                        alert("错误");
+                        document.write(XMLHttpRequest.responseText);
+                    }
+                });
+            }
+        }
+
+        function SetCover(albumID, url) {
+            $.ajax({
+                type: "POST",
+                url: "/Album/SetCover/" + albumID,
+                data: "url=" + url,
+                dataType: "text",
+                beforeSend: function () {
+                    //showOverlay();
+                },
+                success: function (msg) {
+                    //hideOverlay();
+                    data = eval("(" + msg + ")"); //转换为json对象
+                    if (data.code == 1) {
+                        alert("设置成功");
+                    }
+                    else {
+                        alert("设置失败");
+                    }
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    //hideOverlay();
+                    alert("错误");
+                    document.write(XMLHttpRequest.responseText);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
+

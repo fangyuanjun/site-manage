@@ -1,0 +1,131 @@
+﻿@model Blogs.UI.Manage.Models.Link
+
+@{
+    ViewBag.Title = "修改";
+    Layout = "~/Views/V1/Shared/_Index_LayoutEdit.cshtml";
+}
+
+<script type="text/javascript">
+    $(function () {
+        $("#btnSave").click(function () {
+            if ($("#EditForm").valid()) {
+                $.ajax({
+                    url: "/Link/Edit/" + $("#linkID").val(),
+                    type: "Post",
+                    data: $("#EditForm").serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.code == 1) {
+                            window.parent.frameReturnByMes(data.message);
+                            window.parent.frameReturnByReload(true);
+                            window.parent.frameReturnByClose();
+                        }
+                        else {
+                            window.parent.frameReturnByMes(data.message);
+                        }
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        //hideOverlay();
+                        alert("错误");
+                        document.write(XMLHttpRequest.responseText);
+                    }
+                });
+            }
+        });
+    })
+</script>
+
+<div class="mvctool bgb">
+    <a id="btnSave" style="float: left;" class="l-btn l-btn-plain"><span class="l-btn-left"><span class="l-btn-text icon-save" style="padding-left: 20px;">保存</span></span></a>
+</div>
+
+@using (Html.BeginForm("Edit", "Link", null, FormMethod.Post, new { Id = "EditForm" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <table class="fromEditTable setTextWidth300">
+        <tbody>
+            <tr style="display:none">
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.linkID)：
+                </td>
+                <td>
+                    @Html.EditorFor(model => model.linkID)
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.linkID)</td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.linkName)：
+                </td>
+                <td>
+                    @Html.EditorFor(model => model.linkName)
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.linkName)</td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.linkUrl)：
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.linkUrl)
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.linkUrl)</td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.linkPic)：
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.linkPic)
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.linkPic)</td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.linkOrder)：
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.linkOrder)
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.linkOrder)</td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.linkIsDisabled)：
+                </td>
+                <td>
+                    @Html.CheckBoxFor(model => model.linkIsDisabled)
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.linkIsDisabled)</td>
+            </tr>
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.ADD_DATE)：
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.ADD_DATE, new { @readonly = "readonly" })
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.ADD_DATE)</td>
+            </tr>
+
+            <tr>
+                <td style="width:100px; text-align:right;">
+                    @Html.LabelFor(model => model.UPDATE_DATE)：
+                </td>
+                <td>
+                    @Html.TextBoxFor(model => model.UPDATE_DATE, new { @readonly = "readonly" })
+                </td>
+                <td>@Html.ValidationMessageFor(model => model.UPDATE_DATE)</td>
+            </tr>
+        </tbody>
+    </table>
+
+}
+
